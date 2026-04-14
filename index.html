@@ -130,6 +130,7 @@
                         <input type="checkbox" id="input-igreja" class="w-6 h-6 text-blue-600 rounded">
                     </div>
 
+                    <!-- Secção de Localização (Agora sempre visível para troca de endereço) -->
                     <div id="secao-localizacao" class="bg-gray-50 p-3 rounded-lg border">
                         <label class="block text-[10px] font-bold text-gray-700 mb-1 uppercase">Localização (Rua ou Coordenada)</label>
                         <div class="flex gap-2 mb-3">
@@ -140,7 +141,7 @@
                             <button onclick="capturarGPS()" id="btn-gps" class="flex-1 bg-gray-800 text-white py-2 rounded-lg text-xs font-bold shadow-sm">GPS</button>
                             <button onclick="ativarModoPin()" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg text-xs font-bold shadow-sm">MAPA</button>
                         </div>
-                        <p id="status-localizacao" class="text-[10px] font-bold text-gray-500 mt-2 text-center">Defina o local para salvar.</p>
+                        <p id="status-localizacao" class="text-[10px] font-bold text-gray-500 mt-2 text-center uppercase">Aguardando local.</p>
                     </div>
 
                     <button id="btn-salvar-cadastro" onclick="salvarOuAtualizarCadastro()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-lg hover:bg-blue-700 shadow-md transition-all">
@@ -161,7 +162,7 @@
             </div>
         </div>
 
-        <!-- DETALHES / PRONTUÁRIO -->
+        <!-- DETALHES -->
         <div id="modal-detalhes" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center p-4 border-b bg-white rounded-t-2xl">
@@ -216,8 +217,8 @@
             </div>
         </div>
 
-        <div id="aviso-pin" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-5 py-2.5 rounded-full shadow-lg z-[1100] font-bold text-sm flex items-center gap-2">
-            <i class="fas fa-hand-pointer"></i> TOQUE NO TELHADO DA CASA
+        <div id="aviso-pin" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-5 py-2.5 rounded-full shadow-lg z-[1100] font-bold text-sm flex items-center gap-2 uppercase">
+            <i class="fas fa-hand-pointer"></i> Toque no telhado da casa
         </div>
     </div>
 
@@ -228,6 +229,7 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // CONFIGURAÇÃO DO PROJETO
         const firebaseConfig = {
           apiKey: "AIzaSyDHxiMGUn0AgkpsDB9hIjXU43wI4z-7k5c",
           authDomain: "mapeamentobairro.firebaseapp.com",
@@ -270,8 +272,8 @@
                         latAtual = e.latlng.lat; lngAtual = e.latlng.lng; modoPinAtivo = false;
                         document.getElementById('aviso-pin').classList.add('hidden');
                         document.getElementById('map').classList.remove('crosshair-cursor-map');
-                        document.getElementById('status-localizacao').innerText = "Localizado!";
-                        document.getElementById('status-localizacao').className = 'text-[10px] font-bold text-green-600 mt-2 text-center';
+                        document.getElementById('status-localizacao').innerText = "LOCALIZADO: " + latAtual.toFixed(4) + ", " + lngAtual.toFixed(4);
+                        document.getElementById('status-localizacao').className = 'text-[10px] font-black text-green-600 mt-2 text-center';
                         window.abrirModal('modal-cadastro');
                     });
                 }
@@ -296,6 +298,7 @@
             });
         }
 
+        // --- AUTH ---
         window.fazerLogin = async () => {
             const e = document.getElementById('login-email').value.trim();
             const s = document.getElementById('login-senha').value.trim();
@@ -311,6 +314,7 @@
         }
         window.fazerLogout = () => { if(confirm("Deseja sair da conta?")) signOut(auth); }
 
+        // --- BUSCA (TEXTO OU COORDENADA) ---
         window.buscarEndereco = async () => {
             const input = document.getElementById('input-busca-endereco').value.trim();
             const statusLoc = document.getElementById('status-localizacao');
@@ -321,7 +325,7 @@
                 latAtual = parseFloat(match[1]);
                 lngAtual = parseFloat(match[3]);
                 map.setView([latAtual, lngAtual], 18);
-                statusLoc.innerText = "Coordenada Reconhecida!";
+                statusLoc.innerText = "COORDENADA IDENTIFICADA!";
                 statusLoc.className = 'text-[10px] font-bold text-green-600 mt-2 text-center';
                 return;
             }
@@ -337,6 +341,7 @@
             } catch (e) { alert("Erro de conexão."); }
         }
 
+        // --- CRUD ---
         window.abrirModalCadastro = () => {
             idEdicaoAtivo = null;
             document.getElementById('titulo-modal-cadastro').innerText = "Novo Cadastro";
@@ -347,17 +352,17 @@
             document.getElementById('input-igreja').checked = true;
             document.getElementById('avatar-img').classList.add('hidden');
             document.getElementById('avatar-icon').classList.remove('hidden');
-            document.getElementById('secao-localizacao').classList.remove('hidden');
             document.getElementById('status-localizacao').innerText = "Local pendente.";
             document.getElementById('status-localizacao').className = 'text-[10px] font-bold text-gray-500 mt-2 text-center';
             base64TempAvatar = null;
+            latAtual = null; lngAtual = null;
             window.abrirModal('modal-cadastro');
         }
 
         window.salvarOuAtualizarCadastro = async () => {
             const nome = document.getElementById('input-nome').value.trim();
             if(!nome) return alert("O nome é obrigatório.");
-            if(!idEdicaoAtivo && !latAtual) return alert("Defina o local primeiro.");
+            if(!latAtual) return alert("Defina o local primeiro.");
             
             const btn = document.getElementById('btn-salvar-cadastro');
             btn.disabled = true; btn.innerText = "Processando...";
@@ -365,30 +370,27 @@
             const id = idEdicaoAtivo || Date.now().toString();
             const docRef = doc(db, 'familias', id);
             
+            // Buscar dados originais caso existam para não perder visitas
+            let originalData = { visitas: [] };
+            if (idEdicaoAtivo) {
+                const snap = await getDoc(docRef);
+                if (snap.exists()) originalData = snap.data();
+            }
+
             let dados = {
                 id: id,
                 nome: nome,
                 tel: document.getElementById('input-telefone').value.trim(),
                 igreja: document.getElementById('input-igreja').checked ? 'sim' : 'nao',
-                ultimaIda: document.getElementById('input-ultima-ida').value ? document.getElementById('input-ultima-ida').value.split('-').reverse().join('/') : ""
+                ultimaIda: document.getElementById('input-ultima-ida').value ? document.getElementById('input-ultima-ida').value.split('-').reverse().join('/') : "",
+                lat: latAtual,
+                lng: lngAtual,
+                visitas: originalData.visitas,
+                fotoPerfil: base64TempAvatar || originalData.fotoPerfil || null
             };
 
-            if (!idEdicaoAtivo) {
-                dados.lat = latAtual;
-                dados.lng = lngAtual;
-                dados.visitas = [];
-                dados.fotoPerfil = base64TempAvatar || null;
-            } else {
-                const snap = await getDoc(docRef);
-                const original = snap.data();
-                dados.lat = original.lat;
-                dados.lng = original.lng;
-                dados.visitas = original.visitas;
-                dados.fotoPerfil = base64TempAvatar || original.fotoPerfil || null;
-            }
-
             try {
-                await setDoc(docRef, dados, { merge: true });
+                await setDoc(docRef, dados);
                 fecharModal('modal-cadastro');
             } catch (e) { alert("Falha ao salvar dados."); }
             finally { btn.disabled = false; btn.innerText = "Salvar Cadastro"; }
@@ -397,17 +399,26 @@
         window.prepararEdicao = (id) => {
             idEdicaoAtivo = id;
             const f = baseDeDadosLocal.find(x => x.id === id);
+            if (!f) return;
+
             document.getElementById('titulo-modal-cadastro').innerText = "Editar Cadastro";
-            document.getElementById('btn-salvar-cadastro').innerText = "Atualizar Dados";
+            document.getElementById('btn-salvar-cadastro').innerText = "Atualizar Cadastro";
+            
             document.getElementById('input-nome').value = f.nome;
             document.getElementById('input-telefone').value = f.tel;
             document.getElementById('input-igreja').checked = f.igreja === 'sim';
+            
             if(f.ultimaIda) {
                 const p = f.ultimaIda.split('/');
                 document.getElementById('input-ultima-ida').value = `${p[2]}-${p[1]}-${p[0]}`;
             }
-            document.getElementById('secao-localizacao').classList.add('hidden');
-            
+
+            // Carrega as coordenadas atuais para edição
+            latAtual = f.lat;
+            lngAtual = f.lng;
+            document.getElementById('status-localizacao').innerText = "LOCAL ATUAL: " + latAtual.toFixed(4) + ", " + lngAtual.toFixed(4);
+            document.getElementById('status-localizacao').className = 'text-[10px] font-black text-blue-600 mt-2 text-center';
+
             if(f.fotoPerfil) {
                 document.getElementById('avatar-img').src = f.fotoPerfil;
                 document.getElementById('avatar-img').classList.remove('hidden');
@@ -463,8 +474,8 @@
             const marker = L.marker([f.lat, f.lng], { icon }).addTo(map);
             marker.bindPopup(`
                 <div class="text-center">
-                    <b class="text-[14px] text-gray-800">${f.nome}</b><br>
-                    <button onclick="window.abrirDetalhes('${f.id}')" class="bg-gray-800 text-white text-[10px] px-3 py-1.5 rounded-lg mt-2 font-bold shadow-sm">VER PRONTUÁRIO</button>
+                    <b class="text-[14px] text-gray-800 uppercase">${f.nome}</b><br>
+                    <button onclick="window.abrirDetalhes('${f.id}')" class="bg-gray-800 text-white text-[10px] px-3 py-1.5 rounded-lg mt-2 font-bold shadow-sm uppercase">PRONTUÁRIO</button>
                 </div>
             `);
             marcadoresNoMapa[f.id] = marker;
@@ -577,7 +588,7 @@
             navigator.geolocation.getCurrentPosition(p => {
                 latAtual = p.coords.latitude; lngAtual = p.coords.longitude;
                 map.setView([latAtual, lngAtual], 18);
-                document.getElementById('status-localizacao').innerText = "COORDENADA CAPTURADA!";
+                document.getElementById('status-localizacao').innerText = "GPS CAPTURADO!";
                 document.getElementById('status-localizacao').className = 'text-[10px] font-black text-green-600 mt-2 text-center';
             }, () => alert("Ative o GPS do celular."));
         }
