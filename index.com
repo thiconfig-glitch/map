@@ -1,0 +1,755 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mapeamento de Apoio</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        #map { height: 100vh; width: 100vw; z-index: 1; }
+        .modal-overlay { z-index: 1000; }
+        .crosshair-cursor-map { cursor: crosshair !important; }
+        .leaflet-popup-content { width: 230px !important; margin: 10px !important; }
+        #tela-login { z-index: 9999; }
+    </style>
+</head>
+<body class="bg-gray-100 overflow-hidden">
+
+    <!-- TELA DE LOGIN -->
+    <div id="tela-login" class="fixed inset-0 bg-gray-900 flex items-center justify-center transition-opacity duration-300">
+        <div class="bg-white w-[90%] max-w-md rounded-2xl p-8 shadow-2xl flex flex-col items-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Acesso Restrito</h2>
+            <p class="text-sm text-gray-500 mb-6 text-center">Insira suas credenciais operacionais para acessar o mapa de apoio.</p>
+            
+            <div class="w-full space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">E-mail</label>
+                    <input type="email" id="login-email" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-gray-50" placeholder="usuario@equipe.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Senha</label>
+                    <input type="password" id="login-senha" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-gray-50" placeholder="••••••••">
+                </div>
+                <p id="login-erro" class="text-red-500 text-xs font-bold text-center hidden"></p>
+                <button id="btn-entrar" onclick="fazerLogin()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-lg hover:bg-blue-700 transition-colors shadow-md mt-2">
+                    Entrar no Sistema
+                </button>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-6 text-center">O acesso a este sistema é monitorado e exclusivo para a equipe autorizada.</p>
+        </div>
+    </div>
+
+    <!-- O MAPA E A INTERFACE PRINCIPAL -->
+    <div id="app-principal" class="hidden">
+        <div id="map"></div>
+
+        <div class="fixed top-6 left-6 z-50 flex flex-col gap-3">
+            <button onclick="abrirLista()" class="bg-white text-gray-800 p-3 rounded-lg shadow-lg hover:bg-gray-100 active:scale-95 transition-transform h-12 w-12 flex items-center justify-center border border-gray-200">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <button onclick="abrirModal('modal-legenda')" class="bg-white text-gray-500 p-2 rounded-lg shadow-lg hover:bg-gray-100 active:scale-95 transition-transform h-10 w-10 flex items-center justify-center border border-gray-200">
+                <i class="fas fa-question text-lg"></i>
+            </button>
+            <button onclick="fazerLogout()" class="bg-red-50 text-red-600 p-2 rounded-lg shadow-lg hover:bg-red-100 active:scale-95 transition-transform h-10 w-10 flex items-center justify-center border border-red-200 mt-4">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+
+        <div id="cloud-status" class="fixed top-6 right-6 z-50 bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-[10px] font-bold shadow flex items-center gap-1 border border-yellow-300">
+            <i class="fas fa-sync fa-spin"></i> Autenticando...
+        </div>
+
+        <button onclick="abrirModalCadastro()" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700 active:scale-95 transition-transform h-14 w-14 flex items-center justify-center">
+            <i class="fas fa-plus text-xl"></i>
+        </button>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="modais-app">
+        <!-- MODAL DE LEGENDA -->
+        <div id="modal-legenda" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center transition-opacity z-[1020]">
+            <div class="bg-white w-[85%] max-w-sm rounded-xl p-5 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg text-gray-800">Cores do Mapa</h3>
+                    <button onclick="fecharModal('modal-legenda')" class="text-gray-500 hover:text-gray-800"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="space-y-4 text-sm">
+                    <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <div class="text-gray-500 text-3xl drop-shadow-sm"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <p class="font-bold text-gray-800">Cinza (Pendente)</p>
+                            <p class="text-[11px] text-gray-600 leading-tight">Família mapeada, mas ainda não recebeu a primeira visita.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-green-50 p-3 rounded-lg border border-green-100">
+                        <div class="text-green-500 text-3xl drop-shadow-sm"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <p class="font-bold text-gray-800">Verde (Em dia)</p>
+                            <p class="text-[11px] text-gray-600 leading-tight">Última visita realizada dentro dos últimos 30 dias.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-red-50 p-3 rounded-lg border border-red-100">
+                        <div class="text-red-500 text-3xl drop-shadow-sm"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <p class="font-bold text-gray-800">Vermelho (Atrasada)</p>
+                            <p class="text-[11px] text-gray-600 leading-tight">Mais de 30 dias sem visita. Exige atenção imediata.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-red-50 p-3 rounded-lg border border-red-100">
+                        <div class="text-red-500 text-2xl drop-shadow-sm ml-1"><i class="fas fa-heart"></i></div>
+                        <div>
+                            <p class="font-bold text-gray-800">Coração (Base)</p>
+                            <p class="text-[11px] text-gray-600 leading-tight">Localização da Igreja (Rua do Ateneu, 356).</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="fecharModal('modal-legenda')" class="w-full mt-5 bg-gray-800 text-white font-bold py-2.5 rounded-lg hover:bg-gray-700 transition-colors">Entendi</button>
+            </div>
+        </div>
+
+        <!-- MODAL 1: Cadastro da Família -->
+        <div id="modal-cadastro" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center transition-opacity z-[1010]">
+            <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Novo Cadastro</h2>
+                    <button onclick="fecharModal('modal-cadastro')" class="text-gray-500 hover:text-gray-800 p-2"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col items-center">
+                        <label class="relative cursor-pointer group">
+                            <div id="avatar-preview-container" class="w-24 h-24 rounded-full bg-gray-200 border-2 border-dashed border-gray-400 flex items-center justify-center overflow-hidden">
+                                <i id="avatar-icon" class="fas fa-user text-3xl text-gray-400"></i>
+                                <img id="avatar-img" class="hidden w-full h-full object-cover">
+                            </div>
+                            <div class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fas fa-camera text-white"></i>
+                            </div>
+                            <input type="file" accept="image/*" class="hidden" onchange="processarImagem(this, 'avatar')">
+                        </label>
+                        <span class="text-xs text-gray-500 mt-2 font-medium">Foto da pessoa (Opcional)</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nome do familiar</label>
+                        <input type="text" id="input-nome" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500" placeholder="Nome completo">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Telefone</label>
+                            <input type="tel" id="input-telefone" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500" placeholder="(00) 00000-0000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Última ida à Igreja <span class="text-[10px] text-gray-400 font-normal">(Opcional)</span></label>
+                            <input type="date" id="input-ultima-ida" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <span class="text-sm font-medium text-gray-700">Frequenta a Igreja atualmente?</span>
+                        <input type="checkbox" id="input-igreja" class="w-6 h-6 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer" checked>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status Inicial da Visita</label>
+                        <select id="input-status-visita" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white" onchange="toggleDataVisitaInicial()">
+                            <option value="pendente">Apenas Mapear (Deixar Pendente)</option>
+                            <option value="visitada_hoje">Visita realizada hoje</option>
+                            <option value="visitada_anterior">Visita em data anterior</option>
+                        </select>
+                    </div>
+
+                    <div id="container-data-visita-inicial" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data da visita retroativa</label>
+                        <input type="date" id="input-data-visita-inicial" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500 text-sm">
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Buscar Endereço (Aproximado)</label>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="input-busca-endereco" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Ex: Rua A, 123, Montes Claros">
+                            <button onclick="buscarEndereco()" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex gap-2 border-t border-gray-200 pt-3">
+                            <button onclick="capturarGPS()" id="btn-gps" class="flex-1 bg-gray-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-location-arrow mr-1"></i> Usar GPS
+                            </button>
+                            <button onclick="ativarModoPin()" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">
+                                <i class="fas fa-map-pin mr-1"></i> No Mapa
+                            </button>
+                        </div>
+                        <p id="status-localizacao" class="text-[11px] font-bold text-gray-500 mt-2 text-center">Localização não capturada.</p>
+                    </div>
+
+                    <button id="btn-salvar-cadastro" onclick="salvarCadastroInicial()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Salvar Cadastro
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: Lista de Cadastros -->
+        <div id="modal-lista" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center transition-opacity z-[1010]">
+            <div class="bg-white w-full h-full sm:h-auto sm:max-h-[80vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h2 class="text-xl font-bold text-gray-800">Famílias Cadastradas</h2>
+                    <button onclick="fecharModal('modal-lista')" class="text-gray-500 hover:text-gray-800 p-2"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="lista-conteudo" class="p-4 overflow-y-auto flex-1 space-y-3 bg-gray-50">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 3: Histórico (Prontuário) -->
+        <div id="modal-detalhes" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center transition-opacity z-[1010]">
+            <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center p-4 border-b bg-white rounded-t-2xl sm:rounded-t-2xl">
+                    <h2 class="text-lg font-bold text-gray-800">Histórico de Apoio</h2>
+                    <button onclick="fecharModal('modal-detalhes')" class="text-gray-500 hover:text-gray-800 p-2"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="p-4 overflow-y-auto flex-1 bg-white" id="detalhes-conteudo">
+                    <!-- Preenchido via JS -->
+                </div>
+                <div class="p-4 border-t bg-gray-50 rounded-b-none sm:rounded-b-2xl">
+                    <button onclick="prepararNovaVisita()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-3">
+                        <i class="fas fa-plus-circle"></i> Registrar Nova Visita
+                    </button>
+                    <button onclick="excluirCadastroCompleto()" class="w-full bg-white text-red-500 font-bold py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2 border border-red-200 text-sm">
+                        <i class="fas fa-trash-alt"></i> Excluir Cadastro
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 4: Registrar Nova Visita -->
+        <div id="modal-nova-visita" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center transition-opacity z-[1020]">
+            <div class="bg-white w-[90%] max-w-sm rounded-xl p-5 shadow-2xl">
+                <h3 class="font-bold text-lg mb-3 text-gray-800">Registrar Visita</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Data da Visita</label>
+                        <input type="date" id="visita-data" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Observações do apoio espiritual</label>
+                        <textarea id="visita-obs" class="w-full border border-gray-300 rounded p-2 text-sm h-24 outline-none focus:border-blue-500 resize-none" placeholder="Como foi a visita? Motivos de oração..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-camera text-gray-400 mb-1 text-xl"></i>
+                            <span class="text-xs text-gray-500 font-medium">Anexar Foto da Visita</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="processarImagem(this, 'visita')">
+                        </label>
+                        <img id="visita-img-preview" class="hidden mt-2 w-full h-32 object-cover rounded-lg border border-gray-300 shadow-sm">
+                    </div>
+                    
+                    <div class="flex gap-3 mt-4">
+                        <button onclick="fecharModal('modal-nova-visita')" class="flex-1 bg-gray-200 py-2.5 rounded-lg font-bold text-gray-700 hover:bg-gray-300 transition-colors">Cancelar</button>
+                        <button id="btn-salvar-visita" class="flex-1 bg-blue-600 py-2.5 rounded-lg font-bold text-white hover:bg-blue-700 transition-colors">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 5: Confirmação de Exclusão Padrão -->
+        <div id="modal-confirmacao" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center transition-opacity z-[1030]">
+            <div class="bg-white w-[85%] max-w-xs rounded-xl p-6 shadow-2xl text-center">
+                <div class="text-red-500 text-4xl mb-3"><i class="fas fa-exclamation-circle"></i></div>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Atenção</h3>
+                <p id="msg-confirmacao" class="text-sm text-gray-600 mb-5">Tem certeza que deseja excluir?</p>
+                <div class="flex gap-3">
+                    <button onclick="fecharModal('modal-confirmacao')" class="flex-1 bg-gray-200 py-2 rounded-lg font-bold text-gray-700 hover:bg-gray-300">Cancelar</button>
+                    <button id="btn-confirmar-acao" class="flex-1 bg-red-600 py-2 rounded-lg font-bold text-white hover:bg-red-700">Excluir</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="aviso-pin" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-5 py-2.5 rounded-full shadow-lg z-50 font-bold text-sm flex items-center gap-2">
+            <i class="fas fa-hand-pointer"></i> Toque no mapa para marcar
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CHAVES DE PRODUÇÃO DO SEU PROJETO
+        const firebaseConfig = {
+          apiKey: "AIzaSyDHxiMGUn0AgkpsDB9hIjXU43wI4z-7k5c",
+          authDomain: "mapeamentobairro.firebaseapp.com",
+          projectId: "mapeamentobairro",
+          storageBucket: "mapeamentobairro.firebasestorage.app",
+          messagingSenderId: "793441064143",
+          appId: "1:793441064143:web:79faef41d6049eed37d3ba"
+        };
+        
+        let db, auth;
+        if (firebaseConfig.apiKey) {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        }
+
+        let latAtual = null; let lngAtual = null; let modoPinAtivo = false;
+        let base64TempAvatar = null; let base64TempVisita = null;
+        let baseDeDadosLocal = []; let marcadoresNoMapa = {};
+        let familiaFocoId = null; let usuarioAutenticado = null;
+        let unsubscribeSnapshot = null;
+
+        let map = null;
+
+        // Função para definir a Igreja no Mapa baseada em coordenadas exatas
+        function fixarMarcadorIgreja() {
+            const latIgreja = -16.7588417; 
+            const lngIgreja = -43.8673387;
+
+            // Ícone de coração ajustado para 24px
+            const heartIcon = L.divIcon({
+                className: 'c-icon',
+                html: `<div style="color: #ef4444; font-size: 24px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"><i class="fas fa-heart"></i></div>`,
+                iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12]
+            });
+
+            L.marker([latIgreja, lngIgreja], { icon: heartIcon, zIndexOffset: 1000 })
+             .addTo(map)
+             .bindPopup('<div class="text-center"><h3 class="font-bold text-red-600 border-b pb-1 mb-1 text-[14px]">Base / Igreja</h3><p class="text-[10px] text-gray-600 font-bold">Rua do Ateneu, 356<br>Maracanã</p></div>');
+            
+            // Centraliza no ponto base com zoom inicial
+            map.setView([latIgreja, lngIgreja], 15);
+        }
+
+        function inicializarMapa() {
+            if (!map) {
+                map = L.map('map', { zoomControl: false }).setView([-16.7588417, -43.8673387], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM' }).addTo(map);
+                L.control.zoom({ position: 'topright' }).addTo(map);
+                
+                fixarMarcadorIgreja(); // Crava o coração vermelho da Base
+                
+                map.on('click', (e) => {
+                    if (!modoPinAtivo) return;
+                    latAtual = e.latlng.lat; lngAtual = e.latlng.lng; modoPinAtivo = false;
+                    document.getElementById('aviso-pin').classList.add('hidden'); document.getElementById('map').classList.remove('crosshair-cursor-map');
+                    document.getElementById('status-localizacao').innerText = "Marcado no Mapa!"; document.getElementById('status-localizacao').className = 'text-[11px] font-bold text-green-600 mt-2 text-center';
+                    window.abrirModal('modal-cadastro');
+                });
+            }
+            setTimeout(() => map.invalidateSize(), 500);
+        }
+
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    usuarioAutenticado = user;
+                    document.getElementById('tela-login').classList.add('hidden');
+                    document.getElementById('app-principal').classList.remove('hidden');
+                    inicializarMapa();
+                    iniciarEscutaDeDados();
+                } else {
+                    usuarioAutenticado = null;
+                    document.getElementById('tela-login').classList.remove('hidden');
+                    document.getElementById('app-principal').classList.add('hidden');
+                    if (unsubscribeSnapshot) unsubscribeSnapshot();
+                    baseDeDadosLocal = [];
+                    if (map) { for (let id in marcadoresNoMapa) { map.removeLayer(marcadoresNoMapa[id]); } }
+                    marcadoresNoMapa = {};
+                }
+            });
+        }
+
+        window.fazerLogin = async function() {
+            if (!auth) return;
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value.trim();
+            const erroEl = document.getElementById('login-erro');
+            const btn = document.getElementById('btn-entrar');
+            
+            erroEl.classList.add('hidden');
+            if (!email || !senha) {
+                erroEl.innerText = "Preencha e-mail e senha.";
+                erroEl.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
+            btn.disabled = true;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, senha);
+            } catch (error) {
+                console.error(error);
+                erroEl.innerText = "Credenciais inválidas. Acesso negado.";
+                erroEl.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = 'Entrar no Sistema';
+                btn.disabled = false;
+            }
+        }
+
+        window.fazerLogout = async function() {
+            if (auth) {
+                if (confirm("Deseja sair do sistema operacinal?")) {
+                    await signOut(auth);
+                }
+            }
+        }
+
+        function iniciarEscutaDeDados() {
+            if (!usuarioAutenticado || !db) return;
+            const colecaoRef = collection(db, 'familias');
+            
+            unsubscribeSnapshot = onSnapshot(colecaoRef, (snapshot) => {
+                baseDeDadosLocal = [];
+                for (let id in marcadoresNoMapa) { map.removeLayer(marcadoresNoMapa[id]); }
+                marcadoresNoMapa = {};
+
+                snapshot.forEach((docSnap) => {
+                    const familia = docSnap.data();
+                    baseDeDadosLocal.push(familia);
+                    renderizarPinoNoMapa(familia);
+                });
+
+                document.getElementById('cloud-status').className = "fixed top-6 right-6 z-50 bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-[10px] font-bold shadow flex items-center gap-1 border border-green-300";
+                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle"></i> Conectado';
+
+                if (!document.getElementById('modal-lista').classList.contains('hidden')) window.abrirLista();
+                if (familiaFocoId && !document.getElementById('modal-detalhes').classList.contains('hidden')) {
+                    if (baseDeDadosLocal.find(x => x.id === familiaFocoId)) window.abrirDetalhes(familiaFocoId);
+                    else window.fecharModal('modal-detalhes');
+                }
+            }, (error) => {
+                document.getElementById('cloud-status').className = "fixed top-6 right-6 z-50 bg-red-100 text-red-800 px-3 py-1.5 rounded-full text-[10px] font-bold shadow flex items-center gap-1 border border-red-300";
+                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-times-circle"></i> Offline';
+            });
+        }
+
+        window.abrirRota = function(tipo, val1, val2) {
+            let url = '';
+            if (tipo === 'waze') url = `https://waze.com/ul?ll=${val1},${val2}&navigate=yes`;
+            else if (tipo === 'maps') url = `https://maps.google.com/maps?q=${val1},${val2}`;
+            else if (tipo === 'tel') url = `tel:${val1}`;
+
+            if (url) {
+                const a = document.createElement('a');
+                a.href = url;
+                if (tipo !== 'tel') a.target = '_blank';
+                a.click();
+            }
+        }
+
+        window.processarImagem = function(input, tipo) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width; let height = img.height;
+                    const maxWidth = 600;
+
+                    if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
+
+                    if (tipo === 'avatar') {
+                        base64TempAvatar = base64;
+                        document.getElementById('avatar-img').src = base64;
+                        document.getElementById('avatar-img').classList.remove('hidden');
+                        document.getElementById('avatar-icon').classList.add('hidden');
+                    } else if (tipo === 'visita') {
+                        base64TempVisita = base64;
+                        document.getElementById('visita-img-preview').src = base64;
+                        document.getElementById('visita-img-preview').classList.remove('hidden');
+                    }
+                }
+            }
+        }
+
+        window.abrirModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.fecharModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        window.toggleDataVisitaInicial = function() {
+            const status = document.getElementById('input-status-visita').value;
+            const container = document.getElementById('container-data-visita-inicial');
+            if (status === 'visitada_anterior') {
+                container.classList.remove('hidden');
+                document.getElementById('input-data-visita-inicial').valueAsDate = new Date();
+            } else container.classList.add('hidden');
+        }
+
+        window.abrirModalCadastro = function() {
+            document.getElementById('input-nome').value = ''; document.getElementById('input-telefone').value = '';
+            document.getElementById('input-ultima-ida').value = ''; document.getElementById('input-igreja').checked = true;
+            document.getElementById('input-status-visita').value = 'pendente'; document.getElementById('input-busca-endereco').value = '';
+            document.getElementById('container-data-visita-inicial').classList.add('hidden');
+            base64TempAvatar = null;
+            document.getElementById('avatar-img').classList.add('hidden'); document.getElementById('avatar-icon').classList.remove('hidden');
+            latAtual = null; lngAtual = null;
+            document.getElementById('status-localizacao').innerText = 'Localização não capturada.';
+            document.getElementById('status-localizacao').className = 'text-[11px] font-bold text-gray-500 mt-2 text-center';
+            window.abrirModal('modal-cadastro');
+        }
+
+        window.capturarGPS = function() {
+            const btn = document.getElementById('btn-gps'); const statusLoc = document.getElementById('status-localizacao');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Buscando...';
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    latAtual = pos.coords.latitude; lngAtual = pos.coords.longitude;
+                    statusLoc.innerText = "Localização obtida com sucesso!"; statusLoc.className = 'text-[11px] font-bold text-green-600 mt-2 text-center';
+                    btn.innerHTML = '<i class="fas fa-location-arrow mr-1"></i> Usar GPS';
+                    map.setView([latAtual, lngAtual], 17);
+                },
+                (err) => {
+                    statusLoc.innerText = "Falha no GPS. Tente marcar no mapa."; statusLoc.className = 'text-[11px] font-bold text-red-600 mt-2 text-center';
+                    btn.innerHTML = '<i class="fas fa-location-arrow mr-1"></i> Usar GPS';
+                }, { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        window.buscarEndereco = async function() {
+            const endereco = document.getElementById('input-busca-endereco').value.trim();
+            const statusLoc = document.getElementById('status-localizacao');
+            if (!endereco) return alert("Digite um endereço.");
+            statusLoc.innerText = "Buscando...";
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco + ', Brasil')}&limit=1`);
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 17);
+                    window.ativarModoPin();
+                    document.getElementById('aviso-pin').innerHTML = '<i class="fas fa-crosshairs mr-2"></i> Endereço aproximado. Confirme no mapa.';
+                } else {
+                    statusLoc.innerText = "Não encontrado. Use mapa ou GPS."; statusLoc.className = 'text-[11px] font-bold text-red-600 mt-2 text-center';
+                }
+            } catch (e) { statusLoc.innerText = "Erro de conexão."; }
+        }
+
+        window.ativarModoPin = function() {
+            window.fecharModal('modal-cadastro');
+            modoPinAtivo = true;
+            document.getElementById('aviso-pin').classList.remove('hidden'); document.getElementById('map').classList.add('crosshair-cursor-map');
+        }
+
+        function calcularDiasPassados(dataString) {
+            const partes = dataString.split('/');
+            const dataVisita = new Date(partes[2], partes[1] - 1, partes[0]);
+            const hoje = new Date(); dataVisita.setHours(0,0,0,0); hoje.setHours(0,0,0,0);
+            return Math.floor((hoje - dataVisita) / (1000 * 60 * 60 * 24));
+        }
+
+        function obterStatusOperacional(visitas) {
+            if (!visitas || visitas.length === 0) return { cor: '#6b7280', hexClass: 'text-gray-700', bgClass: 'bg-gray-100 border-gray-300', texto: 'Status: Pendente de Visita' };
+            const dias = calcularDiasPassados(visitas[visitas.length - 1].data);
+            if (dias <= 30) return { cor: '#22c55e', hexClass: 'text-green-800', bgClass: 'bg-green-100 border-green-300', texto: 'Status: Visita em dia' };
+            return { cor: '#ef4444', hexClass: 'text-red-800', bgClass: 'bg-red-100 border-red-300', texto: 'Status: Mais de 30 dias sem visita' };
+        }
+
+        window.salvarCadastroInicial = async function() {
+            if (!usuarioAutenticado || !db) return alert("Aguarde a conexão com a nuvem.");
+            const btn = document.getElementById('btn-salvar-cadastro');
+            const nome = document.getElementById('input-nome').value.trim();
+            if (!nome || !latAtual) return alert("Preencha o nome e capture a localização.");
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando na Nuvem...'; btn.disabled = true;
+
+            const familia = {
+                id: Date.now().toString(), nome: nome, tel: document.getElementById('input-telefone').value.trim(),
+                igreja: document.getElementById('input-igreja').checked ? 'sim' : 'nao',
+                ultimaIda: document.getElementById('input-ultima-ida').value ? document.getElementById('input-ultima-ida').value.split('-').reverse().join('/') : "",
+                lat: latAtual, lng: lngAtual, fotoPerfil: base64TempAvatar, visitas: []
+            };
+
+            const statusVisita = document.getElementById('input-status-visita').value;
+            if (statusVisita === 'visitada_hoje') {
+                const h = new Date();
+                familia.visitas.push({ id_visita: Date.now(), data: `${String(h.getDate()).padStart(2, '0')}/${String(h.getMonth() + 1).padStart(2, '0')}/${h.getFullYear()}`, obs: 'Visita registrada no cadastro', foto: null });
+            } else if (statusVisita === 'visitada_anterior') {
+                const d = document.getElementById('input-data-visita-inicial').value;
+                if (!d) { btn.innerHTML = 'Salvar Cadastro'; btn.disabled = false; return alert("Informe a data."); }
+                familia.visitas.push({ id_visita: Date.now(), data: d.split('-').reverse().join('/'), obs: 'Registro retroativo', foto: null });
+            }
+
+            try {
+                const docRef = doc(db, 'familias', familia.id);
+                await setDoc(docRef, familia);
+                window.fecharModal('modal-cadastro');
+            } catch (e) { alert("Erro ao gravar. Verifique suas permissões: " + e.message); } 
+            finally { btn.innerHTML = 'Salvar Cadastro'; btn.disabled = false; }
+        }
+
+        function renderizarPinoNoMapa(f) {
+            const statusOp = obterStatusOperacional(f.visitas);
+            const icon = L.divIcon({
+                className: 'c-icon', html: `<div style="color: ${statusOp.cor}; font-size: 32px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);"><i class="fas fa-map-marker-alt"></i></div>`,
+                iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32]
+            });
+
+            const imgTag = f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-12 h-12 rounded-full object-cover border shadow-sm flex-shrink-0">` : `<div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border shadow-sm flex-shrink-0"><i class="fas fa-user text-gray-400"></i></div>`;
+            const popupContent = `
+                <div class="flex items-center gap-3 border-b pb-3 mb-2 mt-1">
+                    ${imgTag}
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="font-bold text-gray-800 text-[14px] truncate">${f.nome}</h3>
+                        <div class="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border ${statusOp.bgClass} ${statusOp.hexClass}"><i class="fas fa-circle text-[6px]"></i> ${statusOp.texto}</div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 mt-2">
+                    <button onclick="abrirDetalhes('${f.id}')" class="bg-gray-800 text-white py-2 rounded text-xs font-bold w-full hover:bg-gray-700 shadow-sm"><i class="fas fa-folder-open mr-1"></i> Abrir Histórico</button>
+                    <div class="flex gap-2">
+                        <button onclick="window.abrirRota('waze', ${f.lat}, ${f.lng})" class="flex-1 bg-blue-50 text-blue-700 text-center py-2 rounded text-[10px] font-bold border border-blue-200 hover:bg-blue-100">WAZE</button>
+                        <button onclick="window.abrirRota('maps', ${f.lat}, ${f.lng})" class="flex-1 bg-gray-50 text-gray-700 text-center py-2 rounded text-[10px] font-bold border border-gray-200 hover:bg-gray-100">MAPS</button>
+                    </div>
+                </div>
+            `;
+            const marker = L.marker([f.lat, f.lng], { icon }).addTo(map).bindPopup(popupContent);
+            marcadoresNoMapa[f.id] = marker;
+        }
+
+        window.abrirLista = function() {
+            const container = document.getElementById('lista-conteudo'); container.innerHTML = '';
+            if (baseDeDadosLocal.length === 0) {
+                container.innerHTML = '<div class="text-center mt-10 text-gray-400"><i class="fas fa-map-marker-alt text-4xl mb-3"></i><p>Nenhuma família cadastrada.</p></div>';
+            } else {
+                [...baseDeDadosLocal].sort((a,b) => b.id - a.id).forEach(f => {
+                    const statusOp = obterStatusOperacional(f.visitas);
+                    const imgTag = f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-12 h-12 rounded-full object-cover border">` : `<div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border"><i class="fas fa-user text-gray-400"></i></div>`;
+                    container.innerHTML += `
+                        <div onclick="abrirDetalhes('${f.id}')" class="bg-white border rounded-xl p-3 hover:shadow-md cursor-pointer flex items-center gap-3">
+                            ${imgTag}
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800 text-sm">${f.nome}</h3>
+                                <div class="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] uppercase font-bold border ${statusOp.bgClass} ${statusOp.hexClass}"><i class="fas fa-circle text-[5px]"></i> ${statusOp.texto}</div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-300"></i>
+                        </div>
+                    `;
+                });
+            }
+            window.abrirModal('modal-lista');
+        }
+
+        window.abrirDetalhes = function(id) {
+            window.fecharModal('modal-lista'); map.closePopup(); familiaFocoId = id;
+            const f = baseDeDadosLocal.find(x => x.id === id); if (!f) return;
+
+            const container = document.getElementById('detalhes-conteudo');
+            const imgTag = f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">` : `<div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-4 border-white shadow-md"><i class="fas fa-user text-4xl text-gray-400"></i></div>`;
+            
+            let histHTML = f.visitas.length === 0 ? '<div class="text-center py-6 bg-gray-50 rounded border border-dashed"><p class="text-sm text-gray-500 font-medium">Nenhuma visita.</p></div>' : '';
+            [...f.visitas].reverse().forEach(v => {
+                histHTML += `
+                    <div class="relative pl-4 pb-6 border-l-2 border-blue-500 last:border-l-0 last:pb-0">
+                        <div class="absolute w-3.5 h-3.5 bg-blue-500 rounded-full -left-[9px] top-1 border-2 border-white"></div>
+                        <div class="bg-white border rounded-lg p-3 shadow-sm relative group">
+                            <button onclick="excluirVisitaEspecifica(${v.id_visita})" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 transition-colors p-1"><i class="fas fa-trash-alt"></i></button>
+                            <p class="font-bold text-sm text-gray-800 pr-6"><i class="far fa-calendar-alt text-blue-500 mr-1"></i> ${v.data}</p>
+                            ${v.obs ? `<p class="text-sm text-gray-600 mt-2 bg-gray-50 p-2 rounded border">"${v.obs}"</p>` : ''}
+                            ${v.foto ? `<img src="${v.foto}" class="w-full h-40 object-cover rounded-lg mt-3 border">` : ''}
+                        </div>
+                    </div>`;
+            });
+
+            container.innerHTML = `
+                <div class="flex flex-col items-center mb-6">
+                    ${imgTag}
+                    <h3 class="font-bold text-2xl mt-3 text-center text-gray-800">${f.nome}</h3>
+                    <div class="bg-gray-50 rounded-lg p-3 w-full mt-4 flex flex-col gap-2 border">
+                        <div class="flex items-center text-sm text-gray-700"><div class="w-6 text-center mr-2"><i class="fas fa-church text-gray-400"></i></div><span>${f.igreja === 'sim' ? '<strong class="text-green-600">Frequenta</strong> atualmente' : '<strong class="text-red-500">Afastado</strong>'}</span></div>
+                        ${f.ultimaIda ? `<div class="flex items-center text-sm text-gray-700"><div class="w-6 text-center mr-2"><i class="fas fa-calendar-check text-gray-400"></i></div><span>Última vez: <b>${f.ultimaIda}</b></span></div>` : ''}
+                    </div>
+                    <div class="flex gap-2 w-full mt-4">
+                        ${f.tel ? `<button onclick="window.abrirRota('tel', '${f.tel}')" class="flex-1 flex justify-center items-center gap-2 bg-green-100 text-green-700 py-2.5 rounded-lg text-sm font-bold border border-green-200"><i class="fas fa-phone"></i> Ligar</button>` : ''}
+                        <button onclick="map.setView([${f.lat}, ${f.lng}], 18); fecharModal('modal-detalhes'); marcadoresNoMapa['${f.id}'].openPopup();" class="flex-1 flex justify-center items-center gap-2 bg-blue-100 text-blue-700 py-2.5 rounded-lg text-sm font-bold border border-blue-200"><i class="fas fa-map-marker-alt"></i> Mapa</button>
+                    </div>
+                </div>
+                <h4 class="font-bold text-gray-800 border-b-2 pb-2 mb-4"><i class="fas fa-clipboard-list text-gray-400 mr-2"></i>Timeline Espiritual</h4>
+                <div class="ml-2">${histHTML}</div>`;
+            
+            window.abrirModal('modal-detalhes');
+        }
+
+        window.prepararNovaVisita = function() {
+            document.getElementById('visita-obs').value = ''; base64TempVisita = null; document.getElementById('visita-img-preview').classList.add('hidden');
+            window.abrirModal('modal-nova-visita');
+        }
+
+        document.getElementById('btn-salvar-visita').onclick = async () => {
+            if (!usuarioAutenticado || !db || !familiaFocoId) return;
+            const btn = document.getElementById('btn-salvar-visita'); const dataRaw = document.getElementById('visita-data').value;
+            if (!dataRaw) return alert("Selecione a data.");
+
+            btn.innerHTML = 'Salvando...'; btn.disabled = true;
+            const f = baseDeDadosLocal.find(x => x.id === familiaFocoId);
+            const updatedVisitas = [...f.visitas, { id_visita: Date.now(), data: dataRaw.split('-').reverse().join('/'), obs: document.getElementById('visita-obs').value.trim(), foto: base64TempVisita }];
+            
+            try {
+                const docRef = doc(db, 'familias', f.id);
+                await setDoc(docRef, { ...f, visitas: updatedVisitas });
+                window.fecharModal('modal-nova-visita');
+            } catch (e) { alert("Erro ao salvar: " + e.message); }
+            finally { btn.innerHTML = 'Salvar'; btn.disabled = false; }
+        };
+
+        window.excluirCadastroCompleto = function() {
+            document.getElementById('msg-confirmacao').innerText = "Esta ação apagará a família do mapa e todo o seu histórico espiritual. É irreversível.";
+            document.getElementById('btn-confirmar-acao').onclick = confirmarExclusaoFamilia;
+            window.abrirModal('modal-confirmacao');
+        }
+
+        async function confirmarExclusaoFamilia() {
+            if (!usuarioAutenticado || !db || !familiaFocoId) return;
+            const btn = document.getElementById('btn-confirmar-acao'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const docRef = doc(db, 'familias', familiaFocoId);
+                await deleteDoc(docRef);
+                window.fecharModal('modal-confirmacao'); window.fecharModal('modal-detalhes');
+            } catch (e) { alert("Erro ao excluir: " + e.message); btn.innerHTML = 'Excluir'; }
+        }
+
+        window.excluirVisitaEspecifica = function(idVisita) {
+            document.getElementById('msg-confirmacao').innerText = "Deseja apagar este registro de visita do histórico?";
+            document.getElementById('btn-confirmar-acao').onclick = () => confirmarExclusaoVisita(idVisita);
+            window.abrirModal('modal-confirmacao');
+        }
+
+        async function confirmarExclusaoVisita(idVisita) {
+            if (!usuarioAutenticado || !db || !familiaFocoId) return;
+            const btn = document.getElementById('btn-confirmar-acao'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            const f = baseDeDadosLocal.find(x => x.id === familiaFocoId);
+            const visitasAtualizadas = f.visitas.filter(v => v.id_visita !== idVisita);
+            try {
+                const docRef = doc(db, 'familias', f.id);
+                await setDoc(docRef, { ...f, visitas: visitasAtualizadas });
+                window.fecharModal('modal-confirmacao');
+            } catch (e) { alert("Erro ao excluir visita: " + e.message); btn.innerHTML = 'Excluir'; }
+        }
+
+    </script>
+</body>
+</html>
+
+
+```
