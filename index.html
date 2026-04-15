@@ -15,6 +15,17 @@
         .crosshair-cursor-map { cursor: crosshair !important; }
         .leaflet-popup-content { width: 230px !important; margin: 10px !important; }
         #tela-login { z-index: 9999; }
+        /* Estilo sutil para os nomes dos bairros no mapa */
+        .bairro-label {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            font-size: 10px;
+            font-weight: 800;
+            color: rgba(0,0,0,0.4);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body class="bg-gray-100 overflow-hidden">
@@ -22,7 +33,7 @@
     <!-- TELA DE LOGIN -->
     <div id="tela-login" class="fixed inset-0 bg-gray-900 flex items-center justify-center transition-opacity duration-300">
         <div class="bg-white w-[90%] max-w-md rounded-2xl p-8 shadow-2xl flex flex-col items-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Acesso Restrito</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 uppercase tracking-tight">Acesso Restrito</h2>
             
             <div class="w-full space-y-4">
                 <div>
@@ -34,11 +45,11 @@
                     <input type="password" id="login-senha" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-blue-500 bg-gray-50 text-gray-800" placeholder="••••••••">
                 </div>
                 <p id="login-erro" class="text-red-500 text-xs font-bold text-center hidden"></p>
-                <button id="btn-entrar" onclick="fazerLogin()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-lg hover:bg-blue-700 transition-colors shadow-md mt-2">
+                <button id="btn-entrar" onclick="fazerLogin()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-lg hover:bg-blue-700 transition-colors shadow-md mt-2 shadow-blue-200">
                     Entrar no Sistema
                 </button>
             </div>
-            <p class="text-[10px] text-gray-400 mt-8 text-center uppercase tracking-widest">Segurança Monitorada</p>
+            <p class="text-[10px] text-gray-400 mt-8 text-center uppercase tracking-widest font-bold">Segurança Monitorada</p>
         </div>
     </div>
 
@@ -62,27 +73,35 @@
             <i class="fas fa-sync fa-spin"></i> Sincronizando...
         </div>
 
-        <button onclick="abrirModalCadastro()" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700 h-14 w-14 flex items-center justify-center">
+        <button onclick="abrirModalCadastro()" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700 h-14 w-14 flex items-center justify-center shadow-blue-300">
             <i class="fas fa-plus text-xl"></i>
         </button>
     </div>
 
     <!-- MODAIS -->
     <div id="modais-app">
-        <!-- LEGENDA -->
+        <!-- LEGENDA AMPLIADA COM SETORES -->
         <div id="modal-legenda" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1020]">
-             <div class="bg-white w-[85%] max-w-sm rounded-xl p-5 shadow-2xl">
+             <div class="bg-white w-[90%] max-w-md rounded-xl p-5 shadow-2xl overflow-y-auto max-h-[85vh]">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="font-bold text-lg text-gray-800">Cores do Mapa</h3>
-                    <button onclick="fecharModal('modal-legenda')" class="text-gray-400"><i class="fas fa-times"></i></button>
+                    <h3 class="font-bold text-lg text-gray-800 tracking-tight">Legenda Operacional</h3>
+                    <button onclick="fecharModal('modal-legenda')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="space-y-4 text-sm mt-4">
-                    <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-gray-500 text-xl"></i> <div><b class="text-gray-700">Cinza:</b> Pendente de primeira visita</div></div>
-                    <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-green-500 text-xl"></i> <div><b class="text-green-700">Verde:</b> Visita em dia (< 30 dias)</div></div>
-                    <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-red-500 text-xl"></i> <div><b class="text-red-700">Vermelho:</b> Atrasado (> 30 dias)</div></div>
-                    <div class="flex items-center gap-3"><i class="fas fa-heart text-red-500 text-lg"></i> <div><b class="text-red-600">Coração:</b> Base Operacional (Igreja)</div></div>
+                
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Status de Visita</p>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="flex items-center gap-2 text-xs bg-gray-50 p-2 rounded border"><i class="fas fa-map-marker-alt text-gray-400"></i> <span>Pendente</span></div>
+                    <div class="flex items-center gap-2 text-xs bg-green-50 p-2 rounded border border-green-100"><i class="fas fa-map-marker-alt text-green-500"></i> <span>Em dia</span></div>
+                    <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-100"><i class="fas fa-map-marker-alt text-red-500"></i> <span>Atrasado</span></div>
+                    <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-200"><i class="fas fa-heart text-red-600"></i> <span>Base Igreja</span></div>
                 </div>
-                <button onclick="fecharModal('modal-legenda')" class="w-full mt-6 bg-gray-800 text-white py-2.5 rounded-lg font-bold shadow">Fechar</button>
+
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Setores de Atendimento</p>
+                <div id="legenda-bairros" class="grid grid-cols-1 gap-2 text-[11px]">
+                    <!-- Injetado via JS -->
+                </div>
+                
+                <button onclick="fecharModal('modal-legenda')" class="w-full mt-6 bg-gray-800 text-white py-3 rounded-lg font-bold shadow uppercase tracking-widest text-xs">Entendi</button>
             </div>
         </div>
 
@@ -90,14 +109,14 @@
         <div id="modal-cadastro" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 id="titulo-modal-cadastro" class="text-xl font-bold text-gray-800">Novo Cadastro</h2>
+                    <h2 id="titulo-modal-cadastro" class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Novo Cadastro</h2>
                     <button onclick="fecharModal('modal-cadastro')" class="text-gray-500 p-2"><i class="fas fa-times"></i></button>
                 </div>
 
                 <div class="space-y-4">
                     <div class="flex flex-col items-center">
                         <label class="relative cursor-pointer group">
-                            <div id="avatar-preview-container" class="w-24 h-24 rounded-full bg-gray-200 border-2 border-dashed border-gray-400 flex items-center justify-center overflow-hidden">
+                            <div id="avatar-preview-container" class="w-24 h-24 rounded-full bg-gray-200 border-2 border-dashed border-gray-400 flex items-center justify-center overflow-hidden shadow-inner">
                                 <i id="avatar-icon" class="fas fa-user text-3xl text-gray-400"></i>
                                 <img id="avatar-img" class="hidden w-full h-full object-cover">
                             </div>
@@ -106,12 +125,12 @@
                             </div>
                             <input type="file" id="input-foto-perfil" accept="image/*" class="hidden" onchange="processarImagem(this, 'avatar')">
                         </label>
-                        <span class="text-[10px] text-gray-400 mt-1 uppercase font-bold">Toque para foto</span>
+                        <span class="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">Alterar Foto</span>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Nome do familiar</label>
-                        <input type="text" id="input-nome" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500 text-gray-800">
+                        <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Nome da Família</label>
+                        <input type="text" id="input-nome" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500 text-gray-800 font-bold">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -126,25 +145,24 @@
                     </div>
 
                     <div class="flex items-center justify-between bg-gray-50 border rounded-lg p-3">
-                        <span class="text-sm font-bold text-gray-700">Frequenta a Igreja?</span>
+                        <span class="text-sm font-bold text-gray-700 uppercase text-[11px]">Frequenta a Igreja Universal?</span>
                         <input type="checkbox" id="input-igreja" class="w-6 h-6 text-blue-600 rounded">
                     </div>
 
-                    <!-- Secção de Localização (Agora sempre visível para troca de endereço) -->
                     <div id="secao-localizacao" class="bg-gray-50 p-3 rounded-lg border">
                         <label class="block text-[10px] font-bold text-gray-700 mb-1 uppercase">Localização (Rua ou Coordenada)</label>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" id="input-busca-endereco" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Ex: -16.7, -43.8">
-                            <button onclick="buscarEndereco()" class="bg-gray-800 text-white px-3 py-2 rounded-lg shadow"><i class="fas fa-search"></i></button>
+                            <input type="text" id="input-busca-endereco" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-blue-500" placeholder="Rua ou -16.7, -43.8">
+                            <button onclick="buscarEndereco()" class="bg-gray-800 text-white px-3 py-2 rounded-lg shadow hover:bg-black"><i class="fas fa-search text-xs"></i></button>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="capturarGPS()" id="btn-gps" class="flex-1 bg-gray-800 text-white py-2 rounded-lg text-xs font-bold shadow-sm">GPS</button>
-                            <button onclick="ativarModoPin()" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg text-xs font-bold shadow-sm">MAPA</button>
+                            <button onclick="capturarGPS()" id="btn-gps" class="flex-1 bg-gray-800 text-white py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest">GPS</button>
+                            <button onclick="ativarModoPin()" class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest">MAPA</button>
                         </div>
-                        <p id="status-localizacao" class="text-[10px] font-bold text-gray-500 mt-2 text-center uppercase">Aguardando local.</p>
+                        <p id="status-localizacao" class="text-[10px] font-bold text-gray-400 mt-2 text-center uppercase tracking-tighter">Defina o local para habilitar salvamento.</p>
                     </div>
 
-                    <button id="btn-salvar-cadastro" onclick="salvarOuAtualizarCadastro()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-lg hover:bg-blue-700 shadow-md transition-all">
+                    <button id="btn-salvar-cadastro" onclick="salvarOuAtualizarCadastro()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 shadow-md uppercase tracking-widest text-xs transition-all">
                         Salvar Cadastro
                     </button>
                 </div>
@@ -155,7 +173,7 @@
         <div id="modal-lista" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full h-full sm:h-auto sm:max-h-[80vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col">
                 <div class="flex justify-between items-center p-4 border-b">
-                    <h2 class="text-xl font-bold text-gray-800">Cadastrados</h2>
+                    <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Cadastrados</h2>
                     <button onclick="fecharModal('modal-lista')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
                 </div>
                 <div id="lista-conteudo" class="p-4 overflow-y-auto flex-1 space-y-3 bg-gray-50"></div>
@@ -168,16 +186,16 @@
                 <div class="flex justify-between items-center p-4 border-b bg-white rounded-t-2xl">
                     <h2 class="text-lg font-bold text-gray-800 uppercase tracking-tighter">Histórico Espiritual</h2>
                     <div class="flex gap-2">
-                        <button id="btn-edit-mode" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold border border-blue-100 uppercase tracking-widest">Editar</button>
+                        <button id="btn-edit-mode" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black border border-blue-100 uppercase tracking-widest">Editar</button>
                         <button onclick="fecharModal('modal-detalhes')" class="text-gray-500 p-2"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
                 <div class="p-4 overflow-y-auto flex-1 bg-white" id="detalhes-conteudo"></div>
                 <div class="p-4 border-t bg-gray-50">
-                    <button onclick="prepararNovaVisita()" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 mb-3 shadow-md">
+                    <button onclick="prepararNovaVisita()" class="w-full bg-green-600 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-2 mb-3 shadow-md uppercase text-xs tracking-widest">
                         <i class="fas fa-plus-circle"></i> Registrar Visita
                     </button>
-                    <button onclick="excluirCadastroCompleto()" class="w-full text-red-400 font-bold py-2 flex items-center justify-center gap-2 border border-red-50 rounded-lg text-[10px] uppercase tracking-widest">
+                    <button onclick="excluirCadastroCompleto()" class="w-full text-red-400 font-bold py-2 flex items-center justify-center gap-2 border border-red-50 rounded-lg text-[9px] uppercase tracking-[0.2em] font-black">
                         <i class="fas fa-trash-alt"></i> Excluir Cadastro
                     </button>
                 </div>
@@ -187,37 +205,38 @@
         <!-- NOVA VISITA -->
         <div id="modal-nova-visita" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1020]">
             <div class="bg-white w-[90%] max-w-sm rounded-xl p-5 shadow-2xl">
-                <h3 class="font-bold text-lg mb-3 text-gray-800">Nova Visita</h3>
+                <h3 class="font-bold text-lg mb-3 text-gray-800 uppercase tracking-tighter">Nova Visita</h3>
                 <div class="space-y-4">
-                    <input type="date" id="visita-data" class="w-full border rounded-lg p-2.5 text-sm outline-none text-gray-800">
-                    <textarea id="visita-obs" class="w-full border rounded-lg p-2.5 text-sm h-24 outline-none resize-none text-gray-800" placeholder="Relato do apoio..."></textarea>
+                    <input type="date" id="visita-data" class="w-full border rounded-lg p-2.5 text-sm outline-none text-gray-800 font-bold">
+                    <textarea id="visita-obs" class="w-full border rounded-lg p-2.5 text-sm h-24 outline-none resize-none text-gray-800" placeholder="Motivos de oração e relato..."></textarea>
                     <label class="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50">
                         <i class="fas fa-camera text-gray-400"></i>
-                        <span class="text-xs text-gray-500 font-bold">Anexar Foto</span>
+                        <span class="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-1">Anexar Foto</span>
                         <input type="file" accept="image/*" class="hidden" onchange="processarImagem(this, 'visita')">
                     </label>
                     <img id="visita-img-preview" class="hidden w-full h-32 object-cover rounded-lg border shadow-sm">
                     <div class="flex gap-3 mt-4">
-                        <button onclick="fecharModal('modal-nova-visita')" class="flex-1 bg-gray-200 py-2.5 rounded-lg font-bold text-gray-700">Cancelar</button>
-                        <button id="btn-salvar-visita" class="flex-1 bg-blue-600 py-2.5 rounded-lg font-bold text-white shadow">Salvar</button>
+                        <button onclick="fecharModal('modal-nova-visita')" class="flex-1 bg-gray-200 py-3 rounded-lg font-bold text-gray-700 text-xs uppercase tracking-widest">Cancelar</button>
+                        <button id="btn-salvar-visita" class="flex-1 bg-blue-600 py-3 rounded-lg font-bold text-white shadow shadow-blue-200 text-xs uppercase tracking-widest">Salvar</button>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- CONFIRMAÇÃO -->
         <div id="modal-confirmacao" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[1030]">
-            <div class="bg-white w-[85%] max-w-xs rounded-xl p-6 shadow-2xl text-center">
+            <div class="bg-white w-[85%] max-w-xs rounded-xl p-6 shadow-2xl text-center border-t-4 border-red-500">
                 <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
-                <h3 class="font-bold text-lg mb-2 text-gray-800 tracking-tighter">CONFIRMAR?</h3>
-                <p id="msg-confirmacao" class="text-sm text-gray-600 mb-6 font-medium">Esta ação é permanente e os dados serão removidos da nuvem.</p>
+                <h3 class="font-bold text-lg text-gray-800 tracking-tighter uppercase">Confirmar Exclusão?</h3>
+                <p id="msg-confirmacao" class="text-[11px] text-gray-500 mb-6 font-bold uppercase tracking-tight">Esta ação é irreversível e removerá todos os históricos da nuvem.</p>
                 <div class="flex gap-3">
-                    <button onclick="fecharModal('modal-confirmacao')" class="flex-1 bg-gray-100 py-2 rounded-lg font-bold text-gray-600">NÃO</button>
-                    <button id="btn-confirmar-acao" class="flex-1 bg-red-600 py-2 rounded-lg font-bold text-white shadow">SIM, EXCLUIR</button>
+                    <button onclick="fecharModal('modal-confirmacao')" class="flex-1 bg-gray-100 py-2.5 rounded-lg font-black text-gray-600 text-[10px] uppercase">NÃO</button>
+                    <button id="btn-confirmar-acao" class="flex-1 bg-red-600 py-2.5 rounded-lg font-black text-white shadow shadow-red-200 text-[10px] uppercase">SIM, EXCLUIR</button>
                 </div>
             </div>
         </div>
 
-        <div id="aviso-pin" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-5 py-2.5 rounded-full shadow-lg z-[1100] font-bold text-sm flex items-center gap-2 uppercase">
+        <div id="aviso-pin" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-5 py-3 rounded-full shadow-lg z-[1100] font-black text-xs flex items-center gap-2 uppercase tracking-widest">
             <i class="fas fa-hand-pointer"></i> Toque no telhado da casa
         </div>
     </div>
@@ -229,7 +248,7 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO DO PROJETO
+        // CHAVES DE PRODUÇÃO
         const firebaseConfig = {
           apiKey: "AIzaSyDHxiMGUn0AgkpsDB9hIjXU43wI4z-7k5c",
           authDomain: "mapeamentobairro.firebaseapp.com",
@@ -249,6 +268,22 @@
         let familiaFocoId = null; let usuarioAutenticado = null;
         let map = null; let idEdicaoAtivo = null;
 
+        // DEFINIÇÃO DOS BAIRROS (COORDENADAS APROXIMADAS PARA DESTAQUE SUTIL)
+        const setoresOperacionais = [
+            { nome: "Maracanã", cor: "#3b82f6", coords: [[-16.755, -43.872], [-16.754, -43.861], [-16.764, -43.862], [-16.766, -43.870]] },
+            { nome: "Alterosa", cor: "#f97316", coords: [[-16.758, -43.878], [-16.755, -43.872], [-16.766, -43.870], [-16.768, -43.878]] },
+            { nome: "José Corrêa Machado", cor: "#a855f7", coords: [[-16.754, -43.861], [-16.748, -43.858], [-16.755, -43.852], [-16.758, -43.860]] },
+            { nome: "Itatiaia", cor: "#22c55e", coords: [[-16.758, -43.860], [-16.755, -43.852], [-16.764, -43.848], [-16.768, -43.858]] },
+            { nome: "N. Sra. das Graças", cor: "#eab308", coords: [[-16.748, -43.875], [-16.742, -43.870], [-16.748, -43.862], [-16.754, -43.872]] },
+            { nome: "Dona Gregória", cor: "#06b6d4", coords: [[-16.742, -43.878], [-16.738, -43.872], [-16.748, -43.875]] },
+            { nome: "Ciro dos Anjos", cor: "#ec4899", coords: [[-16.768, -43.878], [-16.766, -43.870], [-16.778, -43.868], [-16.780, -43.876]] },
+            { nome: "Jardim São Geraldo", cor: "#78350f", coords: [[-16.758, -43.878], [-16.754, -43.888], [-16.762, -43.888], [-16.768, -43.878]] },
+            { nome: "Joaquim Costa", cor: "#6366f1", coords: [[-16.762, -43.888], [-16.768, -43.888], [-16.772, -43.878], [-16.768, -43.878]] },
+            { nome: "Chiquinho Guimarães", cor: "#84cc16", coords: [[-16.768, -43.878], [-16.772, -43.878], [-16.778, -43.876]] },
+            { nome: "Vila Campos", cor: "#14b8a6", coords: [[-16.766, -43.870], [-16.764, -43.862], [-16.770, -43.860], [-16.778, -43.868]] },
+            { nome: "Vila Greice", cor: "#64748b", coords: [[-16.764, -43.855], [-16.758, -43.852], [-16.762, -43.845], [-16.768, -43.848]] }
+        ];
+
         // --- SISTEMA CORE ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -265,14 +300,17 @@
                         html: `<div style="color: #ef4444; font-size: 24px; text-shadow: 1px 1px 2px #000;"><i class="fas fa-heart"></i></div>`,
                         iconSize: [24, 24], iconAnchor: [12, 12]
                     });
-                    L.marker([-16.7588417, -43.8673387], { icon: heartIcon, zIndexOffset: 2000 }).addTo(map).bindPopup("<div class='text-center'><b>Base Igreja</b><br><span class='text-[10px] text-gray-500'>Rua do Ateneu, 356</span></div>");
+                    L.marker([-16.7588417, -43.8673387], { icon: heartIcon, zIndexOffset: 2000 }).addTo(map).bindPopup("<div class='text-center'><b>Base Igreja Universal</b><br><span class='text-[10px] text-gray-500 font-bold'>Maracanã</span></div>");
+                    
+                    desenharSetores();
+                    gerarLegendaBairros();
                     
                     map.on('click', (e) => {
                         if (!modoPinAtivo) return;
                         latAtual = e.latlng.lat; lngAtual = e.latlng.lng; modoPinAtivo = false;
                         document.getElementById('aviso-pin').classList.add('hidden');
                         document.getElementById('map').classList.remove('crosshair-cursor-map');
-                        document.getElementById('status-localizacao').innerText = "LOCALIZADO: " + latAtual.toFixed(4) + ", " + lngAtual.toFixed(4);
+                        document.getElementById('status-localizacao').innerText = "COORDENADA CAPTURADA!";
                         document.getElementById('status-localizacao').className = 'text-[10px] font-black text-green-600 mt-2 text-center';
                         window.abrirModal('modal-cadastro');
                     });
@@ -283,6 +321,38 @@
                 document.getElementById('app-principal').classList.add('hidden');
             }
         });
+
+        function desenharSetores() {
+            setoresOperacionais.forEach(s => {
+                const poly = L.polygon(s.coords, {
+                    color: s.cor,
+                    fillColor: s.cor,
+                    fillOpacity: 0.07,
+                    weight: 1,
+                    dashArray: '4, 4',
+                    interactive: false
+                }).addTo(map);
+                
+                // Adiciona o nome do bairro como um rótulo sutil no centro do polígono
+                const centro = poly.getBounds().getCenter();
+                L.tooltip({
+                    permanent: true,
+                    direction: 'center',
+                    className: 'bairro-label'
+                }).setLatLng(centro).setContent(s.nome).addTo(map);
+            });
+        }
+
+        function gerarLegendaBairros() {
+            const container = document.getElementById('legenda-bairros');
+            setoresOperacionais.forEach(s => {
+                container.innerHTML += `
+                    <div class="flex items-center gap-3 bg-gray-50 p-2 rounded border border-gray-100 font-bold uppercase tracking-tighter">
+                        <div class="w-4 h-4 rounded shadow-sm" style="background: ${s.cor}; opacity: 0.5;"></div>
+                        <span>${s.nome}</span>
+                    </div>`;
+            });
+        }
 
         function escutarFirestore() {
             onSnapshot(collection(db, 'familias'), (snapshot) => {
@@ -298,23 +368,22 @@
             });
         }
 
-        // --- AUTH ---
+        // --- FUNCIONALIDADES ---
         window.fazerLogin = async () => {
             const e = document.getElementById('login-email').value.trim();
             const s = document.getElementById('login-senha').value.trim();
             const btn = document.getElementById('btn-entrar');
             if(!e || !s) return;
-            btn.innerText = "Autenticando..."; btn.disabled = true;
+            btn.innerText = "VALIDANDO..."; btn.disabled = true;
             try { await signInWithEmailAndPassword(auth, e, s); } 
             catch (err) { 
-                document.getElementById('login-erro').innerText = "Credenciais Inválidas"; 
+                document.getElementById('login-erro').innerText = "ACESSO NEGADO: CREDENCIAIS INCORRETAS"; 
                 document.getElementById('login-erro').classList.remove('hidden'); 
-                btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+                btn.innerText = "ENTRAR NO SISTEMA"; btn.disabled = false;
             }
         }
-        window.fazerLogout = () => { if(confirm("Deseja sair da conta?")) signOut(auth); }
+        window.fazerLogout = () => { if(confirm("Deseja encerrar a sessão operacional?")) signOut(auth); }
 
-        // --- BUSCA (TEXTO OU COORDENADA) ---
         window.buscarEndereco = async () => {
             const input = document.getElementById('input-busca-endereco').value.trim();
             const statusLoc = document.getElementById('status-localizacao');
@@ -322,11 +391,10 @@
             const match = input.match(regexCoord);
 
             if (match) {
-                latAtual = parseFloat(match[1]);
-                lngAtual = parseFloat(match[3]);
+                latAtual = parseFloat(match[1]); lngAtual = parseFloat(match[3]);
                 map.setView([latAtual, lngAtual], 18);
-                statusLoc.innerText = "COORDENADA IDENTIFICADA!";
-                statusLoc.className = 'text-[10px] font-bold text-green-600 mt-2 text-center';
+                statusLoc.innerText = "COORDENADA RECONHECIDA!";
+                statusLoc.className = 'text-[10px] font-black text-green-600 mt-2 text-center';
                 return;
             }
 
@@ -337,40 +405,34 @@
                 if (data.length > 0) {
                     map.setView([data[0].lat, data[0].lon], 17);
                     window.ativarModoPin();
-                } else alert("Não localizado.");
-            } catch (e) { alert("Erro de conexão."); }
+                } else alert("Endereço não localizado no servidor de mapas.");
+            } catch (e) { alert("Falha na conexão com servidor de endereços."); }
         }
 
-        // --- CRUD ---
         window.abrirModalCadastro = () => {
             idEdicaoAtivo = null;
             document.getElementById('titulo-modal-cadastro').innerText = "Novo Cadastro";
             document.getElementById('btn-salvar-cadastro').innerText = "Salvar Cadastro";
-            document.getElementById('input-nome').value = "";
-            document.getElementById('input-telefone').value = "";
-            document.getElementById('input-ultima-ida').value = "";
-            document.getElementById('input-igreja').checked = true;
-            document.getElementById('avatar-img').classList.add('hidden');
-            document.getElementById('avatar-icon').classList.remove('hidden');
-            document.getElementById('status-localizacao').innerText = "Local pendente.";
-            document.getElementById('status-localizacao').className = 'text-[10px] font-bold text-gray-500 mt-2 text-center';
-            base64TempAvatar = null;
-            latAtual = null; lngAtual = null;
+            document.getElementById('input-nome').value = ""; document.getElementById('input-telefone').value = "";
+            document.getElementById('input-ultima-ida').value = ""; document.getElementById('input-igreja').checked = true;
+            document.getElementById('avatar-img').classList.add('hidden'); document.getElementById('avatar-icon').classList.remove('hidden');
+            document.getElementById('status-localizacao').innerText = "AGUARDANDO LOCALIZAÇÃO...";
+            document.getElementById('status-localizacao').className = 'text-[10px] font-bold text-gray-400 mt-2 text-center uppercase';
+            base64TempAvatar = null; latAtual = null; lngAtual = null;
             window.abrirModal('modal-cadastro');
         }
 
         window.salvarOuAtualizarCadastro = async () => {
             const nome = document.getElementById('input-nome').value.trim();
-            if(!nome) return alert("O nome é obrigatório.");
-            if(!latAtual) return alert("Defina o local primeiro.");
+            if(!nome) return alert("O nome da família é obrigatório.");
+            if(!latAtual) return alert("É obrigatório definir o local no mapa ou via GPS.");
             
             const btn = document.getElementById('btn-salvar-cadastro');
-            btn.disabled = true; btn.innerText = "Processando...";
+            btn.disabled = true; btn.innerText = "PROCESSANDO...";
 
             const id = idEdicaoAtivo || Date.now().toString();
             const docRef = doc(db, 'familias', id);
             
-            // Buscar dados originais caso existam para não perder visitas
             let originalData = { visitas: [] };
             if (idEdicaoAtivo) {
                 const snap = await getDoc(docRef);
@@ -392,7 +454,7 @@
             try {
                 await setDoc(docRef, dados);
                 fecharModal('modal-cadastro');
-            } catch (e) { alert("Falha ao salvar dados."); }
+            } catch (e) { alert("Erro ao sincronizar com a nuvem."); }
             finally { btn.disabled = false; btn.innerText = "Salvar Cadastro"; }
         }
 
@@ -403,7 +465,6 @@
 
             document.getElementById('titulo-modal-cadastro').innerText = "Editar Cadastro";
             document.getElementById('btn-salvar-cadastro').innerText = "Atualizar Cadastro";
-            
             document.getElementById('input-nome').value = f.nome;
             document.getElementById('input-telefone').value = f.tel;
             document.getElementById('input-igreja').checked = f.igreja === 'sim';
@@ -413,10 +474,8 @@
                 document.getElementById('input-ultima-ida').value = `${p[2]}-${p[1]}-${p[0]}`;
             }
 
-            // Carrega as coordenadas atuais para edição
-            latAtual = f.lat;
-            lngAtual = f.lng;
-            document.getElementById('status-localizacao').innerText = "LOCAL ATUAL: " + latAtual.toFixed(4) + ", " + lngAtual.toFixed(4);
+            latAtual = f.lat; lngAtual = f.lng;
+            document.getElementById('status-localizacao').innerText = "LOCAL SALVO: " + latAtual.toFixed(5) + ", " + lngAtual.toFixed(5);
             document.getElementById('status-localizacao').className = 'text-[10px] font-black text-blue-600 mt-2 text-center';
 
             if(f.fotoPerfil) {
@@ -473,9 +532,9 @@
             });
             const marker = L.marker([f.lat, f.lng], { icon }).addTo(map);
             marker.bindPopup(`
-                <div class="text-center">
-                    <b class="text-[14px] text-gray-800 uppercase">${f.nome}</b><br>
-                    <button onclick="window.abrirDetalhes('${f.id}')" class="bg-gray-800 text-white text-[10px] px-3 py-1.5 rounded-lg mt-2 font-bold shadow-sm uppercase">PRONTUÁRIO</button>
+                <div class="text-center font-bold">
+                    <b class="text-[13px] text-gray-800 uppercase tracking-tighter">${f.nome}</b><br>
+                    <button onclick="window.abrirDetalhes('${f.id}')" class="bg-gray-800 text-white text-[10px] px-4 py-2 rounded-lg mt-3 font-black shadow-sm uppercase tracking-widest">Ver Histórico</button>
                 </div>
             `);
             marcadoresNoMapa[f.id] = marker;
@@ -495,44 +554,44 @@
                 vHTML += `<div class="border-l-2 border-blue-500 pl-4 mb-5 relative">
                     <div class="absolute -left-[9px] top-0 w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-sm"></div>
                     <div class="flex justify-between items-start">
-                        <p class="text-xs font-bold text-gray-800">${v.data}</p>
-                        <button onclick="excluirVisita(${v.id_visita})" class="text-gray-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        <p class="text-[10px] font-black text-gray-800 uppercase tracking-widest">${v.data}</p>
+                        <button onclick="excluirVisita(${v.id_visita})" class="text-gray-300 hover:text-red-500 transition-colors"><i class="fas fa-trash"></i></button>
                     </div>
-                    <p class="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded border border-gray-100 italic">"${v.obs || 'Sem relato.'}"</p>
-                    ${v.foto ? `<img src="${v.foto}" class="w-full h-40 object-cover rounded-lg mt-3 border shadow-sm">` : ''}
+                    <p class="text-xs text-gray-600 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">"${v.obs || 'Nenhuma observação registrada.'}"</p>
+                    ${v.foto ? `<img src="${v.foto}" class="w-full h-40 object-cover rounded-xl mt-3 border shadow-sm">` : ''}
                 </div>`;
             });
 
             hist.innerHTML = `
                 <div class="text-center mb-6">
                     ${img}
-                    <h3 class="font-bold text-2xl mt-3 text-gray-800">${f.nome}</h3>
-                    <p class="text-sm font-bold text-blue-600 bg-blue-50 inline-block px-3 py-1 rounded-full mt-1">${f.tel || '(Sem telefone)'}</p>
+                    <h3 class="font-black text-2xl mt-3 text-gray-800 uppercase tracking-tighter">${f.nome}</h3>
+                    <p class="text-xs font-black text-blue-600 bg-blue-50 inline-block px-4 py-1.5 rounded-full mt-2 border border-blue-100">${f.tel || 'TELEFONE NÃO CADASTRADO'}</p>
                     <div class="flex gap-2 mt-5">
-                         <button onclick="window.abrirRota('waze', ${f.lat}, ${f.lng})" class="flex-1 bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold shadow uppercase">Waze</button>
-                         <button onclick="window.abrirRota('tel', '${f.tel}')" class="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-xs font-bold shadow uppercase">Ligar</button>
+                         <button onclick="window.abrirRota('waze', ${f.lat}, ${f.lng})" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-black shadow uppercase tracking-[0.2em]">Waze</button>
+                         <button onclick="window.abrirRota('tel', '${f.tel}')" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-[10px] font-black shadow uppercase tracking-[0.2em]">Ligar</button>
                     </div>
                 </div>
-                <div class="bg-gray-50 p-3 rounded-xl mb-4 text-[10px] uppercase font-bold text-gray-500">
-                    <div class="flex justify-between border-b pb-1 mb-1"><span>Frequenta:</span> <span class="text-gray-800 font-black">${f.igreja === 'sim' ? 'SIM' : 'NÃO'}</span></div>
-                    <div class="flex justify-between"><span>Última vez:</span> <span class="text-gray-800 font-black">${f.ultimaIda || '---'}</span></div>
+                <div class="bg-gray-50 p-4 rounded-xl mb-4 text-[10px] uppercase font-black text-gray-400 border">
+                    <div class="flex justify-between border-b pb-2 mb-2 border-gray-200"><span>Frequenta a IURD:</span> <span class="text-gray-800">${f.igreja === 'sim' ? 'SIM' : 'NÃO'}</span></div>
+                    <div class="flex justify-between"><span>Última vez na Igreja:</span> <span class="text-gray-800">${f.ultimaIda || 'REGISTRO AUSENTE'}</span></div>
                 </div>
-                <h4 class="font-bold border-b pb-1 mb-4 text-xs text-gray-400 uppercase tracking-widest flex items-center gap-2"><i class="fas fa-history"></i> Timeline Operacional</h4>
-                ${vHTML || '<div class="text-center py-6 text-gray-400 text-xs italic">Nenhuma visita registrada.</div>'}
+                <h4 class="font-black border-b pb-2 mb-5 text-[10px] text-gray-400 uppercase tracking-widest flex items-center gap-2"><i class="fas fa-history text-gray-300"></i> Timeline de Apoio</h4>
+                ${vHTML || '<div class="text-center py-10 text-gray-400 text-[10px] font-black uppercase tracking-widest italic opacity-50">Sem registros de visita.</div>'}
             `;
             window.abrirModal('modal-detalhes');
         }
 
         window.abrirLista = () => {
             const c = document.getElementById('lista-conteudo'); c.innerHTML = "";
-            if(baseDeDadosLocal.length === 0) c.innerHTML = "<p class='text-center text-gray-400 py-10 uppercase text-xs font-bold'>Nenhum Registro Encontrado</p>";
+            if(baseDeDadosLocal.length === 0) c.innerHTML = "<p class='text-center text-gray-400 py-10 uppercase text-[10px] font-black tracking-widest'>Nenhum registro no banco de dados.</p>";
             [...baseDeDadosLocal].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(f => {
-                c.innerHTML += `<div onclick="window.abrirDetalhes('${f.id}')" class="bg-white p-3 rounded-xl border flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border shadow-inner">
+                c.innerHTML += `<div onclick="window.abrirDetalhes('${f.id}')" class="bg-white p-3 rounded-xl border flex items-center gap-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-inner">
                         ${f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-full h-full object-cover">` : '<i class="fas fa-user text-gray-300"></i>'}
                     </div>
-                    <div class="flex-1"><p class="font-bold text-sm text-gray-800">${f.nome}</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">${f.tel || 'Sem tel.'}</p></div>
-                    <i class="fas fa-chevron-right text-gray-300"></i>
+                    <div class="flex-1 overflow-hidden"><p class="font-black text-sm text-gray-800 uppercase tracking-tighter truncate">${f.nome}</p><p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${f.tel || 'SEM TELEFONE'}</p></div>
+                    <i class="fas fa-chevron-right text-gray-200 text-xs"></i>
                 </div>`;
             });
             window.abrirModal('modal-lista');
@@ -549,7 +608,7 @@
         document.getElementById('btn-salvar-visita').onclick = async () => {
             const f = baseDeDadosLocal.find(x => x.id === familiaFocoId);
             const btn = document.getElementById('btn-salvar-visita');
-            btn.disabled = true; btn.innerText = "Salvando...";
+            btn.disabled = true; btn.innerText = "ENVIANDO...";
             const nova = {
                 id_visita: Date.now(),
                 data: document.getElementById('visita-data').value.split('-').reverse().join('/'),
@@ -560,7 +619,7 @@
             await setDoc(doc(db, 'familias', f.id), f);
             fecharModal('modal-nova-visita');
             window.abrirDetalhes(f.id);
-            btn.disabled = false; btn.innerText = "Salvar";
+            btn.disabled = false; btn.innerText = "SALVAR";
         }
 
         window.excluirCadastroCompleto = () => {
@@ -573,7 +632,7 @@
         }
 
         window.excluirVisita = async (idVis) => {
-            if(confirm("Remover este registro da timeline?")) {
+            if(confirm("Deseja remover este registro de visita permanentemente?")) {
                 const f = baseDeDadosLocal.find(x => x.id === familiaFocoId);
                 f.visitas = f.visitas.filter(v => v.id_visita !== idVis);
                 await setDoc(doc(db, 'familias', f.id), f);
@@ -588,9 +647,9 @@
             navigator.geolocation.getCurrentPosition(p => {
                 latAtual = p.coords.latitude; lngAtual = p.coords.longitude;
                 map.setView([latAtual, lngAtual], 18);
-                document.getElementById('status-localizacao').innerText = "GPS CAPTURADO!";
+                document.getElementById('status-localizacao').innerText = "COORDENADA CAPTURADA VIA GPS";
                 document.getElementById('status-localizacao').className = 'text-[10px] font-black text-green-600 mt-2 text-center';
-            }, () => alert("Ative o GPS do celular."));
+            }, () => alert("Ative o GPS nas configurações do celular."));
         }
 
         window.ativarModoPin = () => {
@@ -601,6 +660,7 @@
         }
 
         window.abrirRota = (t, v1, v2) => {
+            if(!v1) return alert("Dados insuficientes para traçar rota.");
             let url = t === 'waze' ? `https://waze.com/ul?ll=${v1},${v2}&navigate=yes` : `tel:${v1}`;
             const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.click();
         }
