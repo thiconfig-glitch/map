@@ -15,14 +15,6 @@
         .crosshair-cursor-map { cursor: crosshair !important; }
         .leaflet-popup-content { width: 230px !important; margin: 10px !important; }
         #tela-login { z-index: 9999; }
-        /* Estilo das Etiquetas Flutuantes dos Bairros */
-        .badge-bairro {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 0;
-            white-space: nowrap;
-        }
     </style>
 </head>
 <body class="bg-gray-100 overflow-hidden">
@@ -76,7 +68,7 @@
 
     <!-- MODAIS -->
     <div id="modais-app">
-        <!-- LEGENDA AMPLIADA -->
+        <!-- LEGENDA -->
         <div id="modal-legenda" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1020]">
              <div class="bg-white w-[90%] max-w-md rounded-xl p-5 shadow-2xl overflow-y-auto max-h-[85vh]">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -92,9 +84,9 @@
                     <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-200"><i class="fas fa-heart text-red-600"></i> <span class="font-bold">Base Igreja</span></div>
                 </div>
 
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Contagem por Setor</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Lista de Setores</p>
                 <div id="legenda-bairros" class="grid grid-cols-1 gap-2">
-                    <!-- Injetado dinamicamente via JS -->
+                    <!-- Injetado via JS -->
                 </div>
                 
                 <button onclick="fecharModal('modal-legenda')" class="w-full mt-6 bg-gray-800 text-white py-3 rounded-lg font-bold shadow uppercase tracking-widest text-xs">Fechar</button>
@@ -244,6 +236,7 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // CHAVES DE PRODUÇÃO
         const firebaseConfig = {
           apiKey: "AIzaSyDHxiMGUn0AgkpsDB9hIjXU43wI4z-7k5c",
           authDomain: "mapeamentobairro.firebaseapp.com",
@@ -263,22 +256,21 @@
         let familiaFocoId = null; let usuarioAutenticado = null;
         let map = null; let idEdicaoAtivo = null;
 
-        // VETOR DE BAIRROS - Coordenadas centrais corrigidas para Montes Claros
-        // Os polígonos gerados aqui possuem 600x600m invisíveis em torno do centro para garantir o Ray-Casting.
+        // VETOR DE BAIRROS - Coordenadas removidas. Apenas para referência de cor na legenda.
         const setoresOperacionais = [
-            { nome: "Maracanã", cor: "#3b82f6", totalResidencias: 0, coords: [[-16.755, -43.870], [-16.755, -43.864], [-16.761, -43.864], [-16.761, -43.870]] },
-            { nome: "Alterosa", cor: "#f97316", totalResidencias: 0, coords: [[-16.761, -43.875], [-16.761, -43.869], [-16.767, -43.869], [-16.767, -43.875]] },
-            { nome: "José Corrêa Machado", cor: "#a855f7", totalResidencias: 0, coords: [[-16.749, -43.861], [-16.749, -43.855], [-16.755, -43.855], [-16.755, -43.861]] },
-            { nome: "Itatiaia", cor: "#22c55e", totalResidencias: 0, coords: [[-16.755, -43.856], [-16.755, -43.850], [-16.761, -43.850], [-16.761, -43.856]] },
-            { nome: "N. Sra. das Graças", cor: "#eab308", totalResidencias: 0, coords: [[-16.742, -43.872], [-16.742, -43.866], [-16.748, -43.866], [-16.748, -43.872]] },
-            { nome: "Dona Gregória", cor: "#06b6d4", totalResidencias: 0, coords: [[-16.733, -43.879], [-16.733, -43.873], [-16.739, -43.873], [-16.739, -43.879]] },
-            { nome: "Ciro dos Anjos", cor: "#ec4899", totalResidencias: 0, coords: [[-16.765, -43.877], [-16.765, -43.871], [-16.771, -43.871], [-16.771, -43.877]] },
-            { nome: "Jardim São Geraldo", cor: "#78350f", totalResidencias: 0, coords: [[-16.756, -43.885], [-16.756, -43.879], [-16.762, -43.879], [-16.762, -43.885]] },
-            { nome: "Joaquim Costa", cor: "#6366f1", totalResidencias: 0, coords: [[-16.768, -43.886], [-16.768, -43.880], [-16.774, -43.880], [-16.774, -43.886]] },
-            { nome: "Chiquinho Guimarães", cor: "#84cc16", totalResidencias: 0, coords: [[-16.777, -43.871], [-16.777, -43.865], [-16.783, -43.865], [-16.783, -43.871]] },
-            { nome: "Conjunto Olga Benário", cor: "#f43f5e", totalResidencias: 0, coords: [[-16.782, -43.879], [-16.782, -43.873], [-16.788, -43.873], [-16.788, -43.879]] },
-            { nome: "Vila Campos", cor: "#14b8a6", totalResidencias: 0, coords: [[-16.761, -43.868], [-16.761, -43.862], [-16.767, -43.862], [-16.767, -43.868]] },
-            { nome: "Vila Greice", cor: "#64748b", totalResidencias: 0, coords: [[-16.761, -43.861], [-16.761, -43.855], [-16.767, -43.855], [-16.767, -43.861]] }
+            { nome: "Maracanã", cor: "#3b82f6" },
+            { nome: "Alterosa", cor: "#f97316" },
+            { nome: "José Corrêa Machado", cor: "#a855f7" },
+            { nome: "Itatiaia", cor: "#22c55e" },
+            { nome: "N. Sra. das Graças", cor: "#eab308" },
+            { nome: "Dona Gregória", cor: "#06b6d4" },
+            { nome: "Ciro dos Anjos", cor: "#ec4899" },
+            { nome: "Jardim São Geraldo", cor: "#78350f" },
+            { nome: "Joaquim Costa", cor: "#6366f1" },
+            { nome: "Chiquinho Guimarães", cor: "#84cc16" },
+            { nome: "Conjunto Olga Benário", cor: "#f43f5e" },
+            { nome: "Vila Campos", cor: "#14b8a6" },
+            { nome: "Vila Greice", cor: "#64748b" }
         ];
 
         // --- SISTEMA CORE ---
@@ -299,7 +291,7 @@
                     });
                     L.marker([-16.7588417, -43.8673387], { icon: heartIcon, zIndexOffset: 2000 }).addTo(map).bindPopup("<div class='text-center'><b>Base Igreja Universal</b><br><span class='text-[10px] text-gray-500 font-bold'>Maracanã</span></div>");
                     
-                    desenharEtiquetasBairros();
+                    gerarLegendaBairros();
                     
                     map.on('click', (e) => {
                         if (!modoPinAtivo) return;
@@ -318,57 +310,15 @@
             }
         });
 
-        // Desenha APENAS as etiquetas dinâmicas com cores (Polígonos permanecem matematicamente invisíveis)
-        function desenharEtiquetasBairros() {
-            setoresOperacionais.forEach(s => {
-                const poly = L.polygon(s.coords);
-                const centro = poly.getBounds().getCenter();
-
-                const badgeHtml = `<div style="background-color: ${s.cor}E6; color: white; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">${s.nome}</div>`;
-
-                L.tooltip({
-                    permanent: true,
-                    direction: 'center',
-                    className: 'badge-bairro',
-                    interactive: false
-                }).setLatLng(centro).setContent(badgeHtml).addTo(map);
-            });
-        }
-
-        // Ray-Casting invisível para contagem
-        function isMarkerInsidePolygon(point, vs) {
-            var x = point[0], y = point[1];
-            var inside = false;
-            for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-                var xi = vs[i][0], yi = vs[i][1];
-                var xj = vs[j][0], yj = vs[j][1];
-                var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
-            }
-            return inside;
-        }
-
-        function atualizarLegendaDinamicamente() {
+        // Exibe apenas os nomes e cores na legenda estaticamente
+        function gerarLegendaBairros() {
             const container = document.getElementById('legenda-bairros');
             container.innerHTML = '';
-            
             setoresOperacionais.forEach(s => {
-                let contagem = 0;
-                baseDeDadosLocal.forEach(f => {
-                    if (isMarkerInsidePolygon([f.lat, f.lng], s.coords)) {
-                        contagem++;
-                    }
-                });
-
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded" style="background: ${s.cor};"></div>
-                            <span class="text-[11px] font-black text-gray-700 uppercase tracking-tighter truncate w-[110px]">${s.nome}</span>
-                        </div>
-                        <span class="text-[10px] font-bold text-gray-600 bg-white px-2 py-0.5 rounded border shadow-inner">
-                            <strong class="text-blue-600">${contagem}</strong> de ${s.totalResidencias} casas <span class="text-[8px] italic opacity-50">(aprox.)</span>
-                        </span>
+                    <div class="flex items-center gap-3 bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-200 shadow-sm">
+                        <div class="w-4 h-4 rounded" style="background: ${s.cor};"></div>
+                        <span class="text-[11px] font-black text-gray-700 uppercase tracking-tighter">${s.nome}</span>
                     </div>`;
             });
         }
@@ -384,7 +334,6 @@
                     renderizarPino(familia);
                 });
                 document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Conectado';
-                atualizarLegendaDinamicamente();
             });
         }
 
