@@ -15,26 +15,11 @@
         .crosshair-cursor-map { cursor: crosshair !important; }
         .leaflet-popup-content { width: 230px !important; margin: 10px !important; }
         #tela-login { z-index: 9999; }
-        
-        /* CSS do Radar de Telemetria (Ponto Azul Pulsante) */
-        .gps-pulse {
-            background: #2563eb;
-            border-radius: 50%;
-            height: 16px;
-            width: 16px;
-            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
-            animation: pulse-blue 1.5s infinite;
-            border: 2px solid white;
-        }
-        @keyframes pulse-blue {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-        }
     </style>
 </head>
 <body class="bg-gray-100 overflow-hidden">
 
+    <!-- TELA DE ACESSO -->
     <div id="tela-login" class="fixed inset-0 bg-gray-900 flex items-center justify-center transition-opacity duration-300">
         <div class="bg-white w-[90%] max-w-md rounded-2xl p-8 shadow-2xl flex flex-col items-center">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 uppercase tracking-tight">Acesso Restrito</h2>
@@ -56,6 +41,7 @@
         </div>
     </div>
 
+    <!-- APP PRINCIPAL -->
     <div id="app-principal" class="hidden">
         <div id="map"></div>
 
@@ -83,7 +69,9 @@
         </button>
     </div>
 
+    <!-- MODAIS -->
     <div id="modais-app">
+        <!-- LEGENDA -->
         <div id="modal-legenda" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1020]">
              <div class="bg-white w-[90%] max-w-md rounded-xl p-5 shadow-2xl overflow-y-auto max-h-[85vh]">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -99,20 +87,16 @@
                     <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-200"><i class="fas fa-heart text-red-600"></i> <span class="font-bold">Base Igreja</span></div>
                 </div>
 
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Telemetria</p>
-                <div class="flex items-center gap-3 bg-blue-50 px-3 py-2.5 rounded-lg border border-blue-100 shadow-sm mb-6">
-                    <div class="gps-pulse"></div>
-                    <span class="text-[11px] font-black text-blue-800 uppercase tracking-tighter">Sua Localização Exata</span>
-                </div>
-
                 <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Lista de Setores</p>
                 <div id="legenda-bairros" class="grid grid-cols-1 gap-2">
-                    </div>
+                    <!-- Injetado via JS -->
+                </div>
                 
                 <button onclick="fecharModal('modal-legenda')" class="w-full mt-6 bg-gray-800 text-white py-3 rounded-lg font-bold shadow uppercase tracking-widest text-xs">Fechar</button>
             </div>
         </div>
 
+        <!-- CADASTRO / EDIÇÃO -->
         <div id="modal-cadastro" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
                 <div class="flex justify-between items-center mb-4">
@@ -176,16 +160,25 @@
             </div>
         </div>
 
+        <!-- LISTA COM BUSCA INTELIGENTE -->
         <div id="modal-lista" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-[1010]">
-            <div class="bg-white w-full h-full sm:h-auto sm:max-h-[80vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col">
-                <div class="flex justify-between items-center p-4 border-b">
-                    <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Cadastrados</h2>
-                    <button onclick="fecharModal('modal-lista')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
+            <div class="bg-white w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col">
+                <div class="p-4 border-b bg-white rounded-t-2xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Cadastrados</h2>
+                        <button onclick="fecharModal('modal-lista')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
+                    </div>
+                    <!-- Nova Barra de Busca -->
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="input-filtro-lista" onkeyup="filtrarListaAoVivo()" placeholder="Buscar família por nome..." class="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 outline-none focus:border-blue-500 text-sm font-bold text-gray-700 bg-gray-50">
+                    </div>
                 </div>
-                <div id="lista-conteudo" class="p-4 overflow-y-auto flex-1 space-y-3 bg-gray-50"></div>
+                <div id="lista-conteudo" class="p-4 overflow-y-auto flex-1 space-y-3 bg-gray-50 pb-20"></div>
             </div>
         </div>
 
+        <!-- DETALHES -->
         <div id="modal-detalhes" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center p-4 border-b bg-white rounded-t-2xl">
@@ -207,6 +200,7 @@
             </div>
         </div>
 
+        <!-- NOVA VISITA -->
         <div id="modal-nova-visita" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1020]">
             <div class="bg-white w-[90%] max-w-sm rounded-xl p-5 shadow-2xl">
                 <h3 class="font-bold text-lg mb-3 text-gray-800 uppercase tracking-tighter">Nova Visita</h3>
@@ -227,6 +221,7 @@
             </div>
         </div>
 
+        <!-- CONFIRMAÇÃO -->
         <div id="modal-confirmacao" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[1030]">
             <div class="bg-white w-[85%] max-w-xs rounded-xl p-6 shadow-2xl text-center border-t-4 border-red-500">
                 <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
@@ -243,6 +238,19 @@
             <i class="fas fa-hand-pointer"></i> Toque no telhado no mapa
         </div>
     </div>
+
+    <!-- O ponto azul do radar será gerado nativamente pelo Leaflet quando acionado -->
+    <style>
+        .gps-pulse {
+            background: #2563eb; border-radius: 50%; height: 16px; width: 16px;
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); animation: pulse-blue 1.5s infinite; border: 2px solid white;
+        }
+        @keyframes pulse-blue {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+    </style>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
@@ -271,11 +279,10 @@
         let familiaFocoId = null; let usuarioAutenticado = null;
         let map = null; let idEdicaoAtivo = null;
 
-        // Variáveis do Radar/Tracker de Posição
         let gpsTrackerId = null;
         let marcadorRadar = null;
 
-        // VETOR DE BAIRROS - Apenas para referência de cor na legenda.
+        // Apenas lista estática para a legenda, sem coordenadas
         const setoresOperacionais = [
             { nome: "Maracanã", cor: "#3b82f6" },
             { nome: "Alterosa", cor: "#f97316" },
@@ -326,28 +333,24 @@
             } else {
                 document.getElementById('tela-login').classList.remove('hidden');
                 document.getElementById('app-principal').classList.add('hidden');
-                // Desliga radar ao sair
                 if(gpsTrackerId !== null) window.toggleTracker(); 
             }
         });
 
-        // --- SISTEMA DE TELEMETRIA (RADAR) ---
+        // --- SISTEMA DE TELEMETRIA ---
         window.toggleTracker = () => {
             const btn = document.getElementById('btn-tracker');
             
             if (gpsTrackerId !== null) {
-                // Desligar Radar
                 navigator.geolocation.clearWatch(gpsTrackerId);
                 gpsTrackerId = null;
                 if (marcadorRadar) {
                     map.removeLayer(marcadorRadar);
                     marcadorRadar = null;
                 }
-                // Reseta estilo do botão
                 btn.classList.remove('bg-blue-600', 'text-white');
                 btn.classList.add('bg-white', 'text-blue-600');
             } else {
-                // Ligar Radar
                 btn.classList.remove('bg-white', 'text-blue-600');
                 btn.classList.add('bg-blue-600', 'text-white');
                 
@@ -363,18 +366,19 @@
                     if (!marcadorRadar) {
                         const pulseIcon = L.divIcon({ className: '', html: "<div class='gps-pulse'></div>", iconSize: [16, 16], iconAnchor: [8, 8] });
                         marcadorRadar = L.marker([lat, lng], { icon: pulseIcon, zIndexOffset: 3000 }).addTo(map);
-                        map.setView([lat, lng], 17); // Centraliza na primeira leitura
                     } else {
                         marcadorRadar.setLatLng([lat, lng]);
                     }
+                    map.setView([lat, lng], map.getZoom());
+
                 }, (err) => {
                     alert("Não foi possível acessar o GPS em tempo real. Verifique as permissões do navegador.");
-                    window.toggleTracker(); // Força desligamento na interface
+                    window.toggleTracker();
                 }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
             }
         }
 
-        // Exibe apenas os nomes e cores na legenda estaticamente
+        // --- LEGENDA E BASE ---
         function gerarLegendaBairros() {
             const container = document.getElementById('legenda-bairros');
             container.innerHTML = '';
@@ -398,6 +402,10 @@
                     renderizarPino(familia);
                 });
                 document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Conectado';
+                // Se a lista estiver aberta, atualiza ela ao vivo
+                if(!document.getElementById('modal-lista').classList.contains('hidden')) {
+                    window.filtrarListaAoVivo();
+                }
             });
         }
 
@@ -441,6 +449,7 @@
             } catch (e) { alert("Falha na conexão."); }
         }
 
+        // --- CRUD E FORMS ---
         window.abrirModalCadastro = () => {
             idEdicaoAtivo = null;
             document.getElementById('titulo-modal-cadastro').innerText = "Novo Registro";
@@ -554,6 +563,45 @@
             }
         }
 
+        // --- LISTA E BUSCA INTELIGENTE ---
+        window.abrirLista = () => {
+            document.getElementById('input-filtro-lista').value = "";
+            renderizarListaInterna("");
+            window.abrirModal('modal-lista');
+        }
+
+        window.filtrarListaAoVivo = () => {
+            const termo = document.getElementById('input-filtro-lista').value.toLowerCase();
+            renderizarListaInterna(termo);
+        }
+
+        function renderizarListaInterna(filtro) {
+            const c = document.getElementById('lista-conteudo');
+            c.innerHTML = "";
+            
+            let arrayFiltrado = baseDeDadosLocal;
+            
+            if (filtro) {
+                arrayFiltrado = arrayFiltrado.filter(f => (f.nome || "").toLowerCase().includes(filtro));
+            }
+
+            if(arrayFiltrado.length === 0) {
+                c.innerHTML = "<p class='text-center text-gray-400 py-10 uppercase text-[10px] font-black tracking-widest'>Nenhum registro encontrado.</p>";
+                return;
+            }
+
+            // Ordenação Alfabética Rigorosa PT-BR
+            [...arrayFiltrado].sort((a,b) => (a.nome || "").localeCompare((b.nome || ""), 'pt-BR', { sensitivity: 'base' })).forEach(f => {
+                c.innerHTML += `<div onclick="window.abrirDetalhes('${f.id}')" class="bg-white p-3 rounded-xl border flex items-center gap-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-inner flex-shrink-0">
+                        ${f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-full h-full object-cover">` : '<i class="fas fa-user text-gray-300"></i>'}
+                    </div>
+                    <div class="flex-1 overflow-hidden"><p class="font-black text-sm text-gray-800 uppercase tracking-tighter truncate">${f.nome}</p><p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${f.tel || 'SEM TELEFONE'}</p></div>
+                    <i class="fas fa-chevron-right text-gray-200 text-xs"></i>
+                </div>`;
+            });
+        }
+
         function renderizarPino(f) {
             const dias = calcularDias(f.visitas);
             const cor = f.visitas.length === 0 ? '#6b7280' : (dias <= 30 ? '#22c55e' : '#ef4444');
@@ -612,21 +660,6 @@
                 ${vHTML || '<div class="text-center py-10 text-gray-400 text-[10px] font-black uppercase tracking-widest italic opacity-50">Sem registros de visita.</div>'}
             `;
             window.abrirModal('modal-detalhes');
-        }
-
-        window.abrirLista = () => {
-            const c = document.getElementById('lista-conteudo'); c.innerHTML = "";
-            if(baseDeDadosLocal.length === 0) c.innerHTML = "<p class='text-center text-gray-400 py-10 uppercase text-[10px] font-black tracking-widest'>Nenhum registro no banco de dados.</p>";
-            [...baseDeDadosLocal].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(f => {
-                c.innerHTML += `<div onclick="window.abrirDetalhes('${f.id}')" class="bg-white p-3 rounded-xl border flex items-center gap-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
-                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-inner">
-                        ${f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-full h-full object-cover">` : '<i class="fas fa-user text-gray-300"></i>'}
-                    </div>
-                    <div class="flex-1 overflow-hidden"><p class="font-black text-sm text-gray-800 uppercase tracking-tighter truncate">${f.nome}</p><p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${f.tel || 'SEM TELEFONE'}</p></div>
-                    <i class="fas fa-chevron-right text-gray-200 text-xs"></i>
-                </div>`;
-            });
-            window.abrirModal('modal-lista');
         }
 
         window.prepararNovaVisita = () => {
