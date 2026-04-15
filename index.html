@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -38,7 +38,7 @@
                     <input type="email" id="login-email" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-blue-500 bg-gray-50 text-gray-800" placeholder="email@acesso.com">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Palavra-passe</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Senha</label>
                     <input type="password" id="login-senha" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-blue-500 bg-gray-50 text-gray-800" placeholder="••••••••">
                 </div>
                 <p id="login-erro" class="text-red-500 text-xs font-bold text-center hidden"></p>
@@ -66,7 +66,7 @@
         </div>
 
         <div id="cloud-status" class="fixed top-6 right-6 z-50 bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-[10px] font-bold shadow border border-yellow-300">
-            <i class="fas fa-sync fa-spin"></i> A Sincronizar...
+            <i class="fas fa-sync fa-spin"></i> Sincronizando...
         </div>
 
         <button onclick="abrirModalCadastro()" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700 h-14 w-14 flex items-center justify-center shadow-blue-300">
@@ -84,15 +84,15 @@
                     <button onclick="fecharModal('modal-legenda')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
                 </div>
                 
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Estado das Visitas</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Status de Visita</p>
                 <div class="grid grid-cols-2 gap-3 mb-6">
                     <div class="flex items-center gap-2 text-xs bg-gray-50 p-2 rounded border"><i class="fas fa-map-marker-alt text-gray-400"></i> <span class="font-bold">Pendente</span></div>
                     <div class="flex items-center gap-2 text-xs bg-green-50 p-2 rounded border border-green-100"><i class="fas fa-map-marker-alt text-green-500"></i> <span class="font-bold">Em dia</span></div>
-                    <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-100"><i class="fas fa-map-marker-alt text-red-500"></i> <span class="font-bold">Em atraso</span></div>
+                    <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-100"><i class="fas fa-map-marker-alt text-red-500"></i> <span class="font-bold">Atrasado</span></div>
                     <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-200"><i class="fas fa-heart text-red-600"></i> <span class="font-bold">Base Igreja</span></div>
                 </div>
 
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Contagem por Sector</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Contagem por Setor</p>
                 <div id="legenda-bairros" class="grid grid-cols-1 gap-2">
                     <!-- Injetado dinamicamente via JS -->
                 </div>
@@ -105,7 +105,7 @@
         <div id="modal-cadastro" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 id="titulo-modal-cadastro" class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Novo Registo</h2>
+                    <h2 id="titulo-modal-cadastro" class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Novo Registro</h2>
                     <button onclick="fecharModal('modal-cadastro')" class="text-gray-500 p-2"><i class="fas fa-times"></i></button>
                 </div>
 
@@ -131,7 +131,7 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Contacto</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Telefone</label>
                             <input type="tel" id="input-telefone" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500 text-gray-800">
                         </div>
                         <div>
@@ -155,11 +155,11 @@
                             <button onclick="capturarGPS()" id="btn-gps" class="flex-1 bg-gray-800 text-white py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest">GPS</button>
                             <button onclick="ativarModoPin()" class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest">MAPA</button>
                         </div>
-                        <p id="status-localizacao" class="text-[10px] font-bold text-gray-400 mt-2 text-center uppercase tracking-tighter">Defina o local para guardar.</p>
+                        <p id="status-localizacao" class="text-[10px] font-bold text-gray-400 mt-2 text-center uppercase tracking-tighter">Defina o local para salvar.</p>
                     </div>
 
                     <button id="btn-salvar-cadastro" onclick="salvarOuAtualizarCadastro()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 shadow-md uppercase tracking-widest text-xs transition-all">
-                        Guardar Registo
+                        Salvar Registro
                     </button>
                 </div>
             </div>
@@ -169,7 +169,7 @@
         <div id="modal-lista" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-[1010]">
             <div class="bg-white w-full h-full sm:h-auto sm:max-h-[80vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col">
                 <div class="flex justify-between items-center p-4 border-b">
-                    <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Registados</h2>
+                    <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Cadastrados</h2>
                     <button onclick="fecharModal('modal-lista')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
                 </div>
                 <div id="lista-conteudo" class="p-4 overflow-y-auto flex-1 space-y-3 bg-gray-50"></div>
@@ -189,10 +189,10 @@
                 <div class="p-4 overflow-y-auto flex-1 bg-white" id="detalhes-conteudo"></div>
                 <div class="p-4 border-t bg-gray-50">
                     <button onclick="prepararNovaVisita()" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 mb-3 shadow-md uppercase text-xs tracking-widest">
-                        <i class="fas fa-plus-circle"></i> Registar Visita
+                        <i class="fas fa-plus-circle"></i> Registrar Visita
                     </button>
                     <button onclick="excluirCadastroCompleto()" class="w-full text-red-400 font-bold py-2 flex items-center justify-center gap-2 border border-red-50 rounded-lg text-[9px] uppercase tracking-[0.2em] font-black">
-                        <i class="fas fa-trash-alt"></i> Apagar Registo
+                        <i class="fas fa-trash-alt"></i> Excluir Cadastro
                     </button>
                 </div>
             </div>
@@ -213,7 +213,7 @@
                     <img id="visita-img-preview" class="hidden w-full h-32 object-cover rounded-lg border shadow-sm">
                     <div class="flex gap-3 mt-4">
                         <button onclick="fecharModal('modal-nova-visita')" class="flex-1 bg-gray-200 py-3 rounded-lg font-bold text-gray-700 text-xs uppercase tracking-widest">Cancelar</button>
-                        <button id="btn-salvar-visita" class="flex-1 bg-blue-600 py-3 rounded-lg font-bold text-white shadow shadow-blue-200 text-xs uppercase tracking-widest">Guardar</button>
+                        <button id="btn-salvar-visita" class="flex-1 bg-blue-600 py-3 rounded-lg font-bold text-white shadow shadow-blue-200 text-xs uppercase tracking-widest">Salvar</button>
                     </div>
                 </div>
             </div>
@@ -223,11 +223,11 @@
         <div id="modal-confirmacao" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[1030]">
             <div class="bg-white w-[85%] max-w-xs rounded-xl p-6 shadow-2xl text-center border-t-4 border-red-500">
                 <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
-                <h3 class="font-bold text-lg mb-2 text-gray-800 tracking-tighter uppercase">Confirmar Eliminação?</h3>
-                <p id="msg-confirmacao" class="text-[11px] text-gray-500 mb-6 font-bold uppercase tracking-tight">Esta ação é irreversível e removerá todos os dados da base de dados.</p>
+                <h3 class="font-bold text-lg mb-2 text-gray-800 tracking-tighter uppercase">Confirmar Exclusão?</h3>
+                <p id="msg-confirmacao" class="text-[11px] text-gray-500 mb-6 font-bold uppercase tracking-tight">Esta ação é irreversível e removerá todos os dados do banco.</p>
                 <div class="flex gap-3">
                     <button onclick="fecharModal('modal-confirmacao')" class="flex-1 bg-gray-100 py-2.5 rounded-lg font-black text-gray-600 text-[10px] uppercase">NÃO</button>
-                    <button id="btn-confirmar-acao" class="flex-1 bg-red-600 py-2.5 rounded-lg font-black text-white shadow shadow-red-200 text-[10px] uppercase">SIM, ELIMINAR</button>
+                    <button id="btn-confirmar-acao" class="flex-1 bg-red-600 py-2.5 rounded-lg font-black text-white shadow shadow-red-200 text-[10px] uppercase">SIM, EXCLUIR</button>
                 </div>
             </div>
         </div>
@@ -244,7 +244,6 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CHAVES DE PRODUÇÃO
         const firebaseConfig = {
           apiKey: "AIzaSyDHxiMGUn0AgkpsDB9hIjXU43wI4z-7k5c",
           authDomain: "mapeamentobairro.firebaseapp.com",
@@ -264,21 +263,22 @@
         let familiaFocoId = null; let usuarioAutenticado = null;
         let map = null; let idEdicaoAtivo = null;
 
-        // VETOR DE BAIRROS - Coordenadas usadas apenas para lógica matemática (invisíveis)
+        // VETOR DE BAIRROS - Coordenadas centrais corrigidas para Montes Claros
+        // Os polígonos gerados aqui possuem 600x600m invisíveis em torno do centro para garantir o Ray-Casting.
         const setoresOperacionais = [
-            { nome: "Maracanã", cor: "#3b82f6", totalResidencias: 0, coords: [[-16.753, -43.870], [-16.755, -43.860], [-16.763, -43.862], [-16.762, -43.871]] },
-            { nome: "Alterosa", cor: "#f97316", totalResidencias: 0, coords: [[-16.755, -43.879], [-16.753, -43.870], [-16.762, -43.871], [-16.765, -43.879]] },
-            { nome: "José Corrêa Machado", cor: "#a855f7", totalResidencias: 0, coords: [[-16.749, -43.864], [-16.751, -43.856], [-16.755, -43.858], [-16.753, -43.865]] },
-            { nome: "Itatiaia", cor: "#22c55e", totalResidencias: 0, coords: [[-16.755, -43.858], [-16.754, -43.850], [-16.761, -43.852], [-16.763, -43.862]] },
-            { nome: "N. Sra. das Graças", cor: "#eab308", totalResidencias: 0, coords: [[-16.741, -43.873], [-16.737, -43.865], [-16.749, -43.864], [-16.753, -43.870]] },
-            { nome: "Dona Gregória", cor: "#06b6d4", totalResidencias: 0, coords: [[-16.735, -43.880], [-16.730, -43.870], [-16.741, -43.873]] },
-            { nome: "Ciro dos Anjos", cor: "#ec4899", totalResidencias: 0, coords: [[-16.765, -43.879], [-16.762, -43.871], [-16.772, -43.868], [-16.775, -43.876]] },
-            { nome: "Jardim São Geraldo", cor: "#78350f", totalResidencias: 0, coords: [[-16.757, -43.888], [-16.755, -43.879], [-16.765, -43.879], [-16.768, -43.886]] },
-            { nome: "Joaquim Costa", cor: "#6366f1", totalResidencias: 0, coords: [[-16.768, -43.886], [-16.765, -43.879], [-16.775, -43.876], [-16.778, -43.884]] },
-            { nome: "Chiquinho Guimarães", cor: "#84cc16", totalResidencias: 0, coords: [[-16.775, -43.876], [-16.772, -43.868], [-16.782, -43.865], [-16.785, -43.872]] },
-            { nome: "Conjunto Olga Benário", cor: "#f43f5e", totalResidencias: 0, coords: [[-16.778, -43.884], [-16.775, -43.876], [-16.785, -43.872], [-16.788, -43.880]] },
-            { nome: "Vila Campos", cor: "#14b8a6", totalResidencias: 0, coords: [[-16.762, -43.871], [-16.763, -43.862], [-16.769, -43.861], [-16.772, -43.868]] },
-            { nome: "Vila Greice", cor: "#64748b", totalResidencias: 0, coords: [[-16.763, -43.862], [-16.761, -43.852], [-16.768, -43.850], [-16.769, -43.861]] }
+            { nome: "Maracanã", cor: "#3b82f6", totalResidencias: 0, coords: [[-16.755, -43.870], [-16.755, -43.864], [-16.761, -43.864], [-16.761, -43.870]] },
+            { nome: "Alterosa", cor: "#f97316", totalResidencias: 0, coords: [[-16.761, -43.875], [-16.761, -43.869], [-16.767, -43.869], [-16.767, -43.875]] },
+            { nome: "José Corrêa Machado", cor: "#a855f7", totalResidencias: 0, coords: [[-16.749, -43.861], [-16.749, -43.855], [-16.755, -43.855], [-16.755, -43.861]] },
+            { nome: "Itatiaia", cor: "#22c55e", totalResidencias: 0, coords: [[-16.755, -43.856], [-16.755, -43.850], [-16.761, -43.850], [-16.761, -43.856]] },
+            { nome: "N. Sra. das Graças", cor: "#eab308", totalResidencias: 0, coords: [[-16.742, -43.872], [-16.742, -43.866], [-16.748, -43.866], [-16.748, -43.872]] },
+            { nome: "Dona Gregória", cor: "#06b6d4", totalResidencias: 0, coords: [[-16.733, -43.879], [-16.733, -43.873], [-16.739, -43.873], [-16.739, -43.879]] },
+            { nome: "Ciro dos Anjos", cor: "#ec4899", totalResidencias: 0, coords: [[-16.765, -43.877], [-16.765, -43.871], [-16.771, -43.871], [-16.771, -43.877]] },
+            { nome: "Jardim São Geraldo", cor: "#78350f", totalResidencias: 0, coords: [[-16.756, -43.885], [-16.756, -43.879], [-16.762, -43.879], [-16.762, -43.885]] },
+            { nome: "Joaquim Costa", cor: "#6366f1", totalResidencias: 0, coords: [[-16.768, -43.886], [-16.768, -43.880], [-16.774, -43.880], [-16.774, -43.886]] },
+            { nome: "Chiquinho Guimarães", cor: "#84cc16", totalResidencias: 0, coords: [[-16.777, -43.871], [-16.777, -43.865], [-16.783, -43.865], [-16.783, -43.871]] },
+            { nome: "Conjunto Olga Benário", cor: "#f43f5e", totalResidencias: 0, coords: [[-16.782, -43.879], [-16.782, -43.873], [-16.788, -43.873], [-16.788, -43.879]] },
+            { nome: "Vila Campos", cor: "#14b8a6", totalResidencias: 0, coords: [[-16.761, -43.868], [-16.761, -43.862], [-16.767, -43.862], [-16.767, -43.868]] },
+            { nome: "Vila Greice", cor: "#64748b", totalResidencias: 0, coords: [[-16.761, -43.861], [-16.761, -43.855], [-16.767, -43.855], [-16.767, -43.861]] }
         ];
 
         // --- SISTEMA CORE ---
@@ -318,10 +318,9 @@
             }
         });
 
-        // Desenha APENAS as etiquetas dinâmicas com cores
+        // Desenha APENAS as etiquetas dinâmicas com cores (Polígonos permanecem matematicamente invisíveis)
         function desenharEtiquetasBairros() {
             setoresOperacionais.forEach(s => {
-                // Usa o polígono temporariamente apenas para descobrir o centroide matemático
                 const poly = L.polygon(s.coords);
                 const centro = poly.getBounds().getCenter();
 
@@ -336,7 +335,7 @@
             });
         }
 
-        // Ray-Casting invisível
+        // Ray-Casting invisível para contagem
         function isMarkerInsidePolygon(point, vs) {
             var x = point[0], y = point[1];
             var inside = false;
@@ -384,7 +383,7 @@
                     baseDeDadosLocal.push(familia);
                     renderizarPino(familia);
                 });
-                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Acessível';
+                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Conectado';
                 atualizarLegendaDinamicamente();
             });
         }
@@ -394,7 +393,7 @@
             const s = document.getElementById('login-senha').value.trim();
             const btn = document.getElementById('btn-entrar');
             if(!e || !s) return;
-            btn.innerText = "A VALIDAR..."; btn.disabled = true;
+            btn.innerText = "VALIDANDO..."; btn.disabled = true;
             try { await signInWithEmailAndPassword(auth, e, s); } 
             catch (err) { 
                 document.getElementById('login-erro').innerText = "ACESSO NEGADO: CREDENCIAIS INVÁLIDAS"; 
@@ -426,17 +425,17 @@
                     map.setView([data[0].lat, data[0].lon], 17);
                     window.ativarModoPin();
                 } else alert("Endereço não localizado.");
-            } catch (e) { alert("Falha na ligação."); }
+            } catch (e) { alert("Falha na conexão."); }
         }
 
         window.abrirModalCadastro = () => {
             idEdicaoAtivo = null;
-            document.getElementById('titulo-modal-cadastro').innerText = "Novo Registo";
-            document.getElementById('btn-salvar-cadastro').innerText = "Guardar Registo";
+            document.getElementById('titulo-modal-cadastro').innerText = "Novo Registro";
+            document.getElementById('btn-salvar-cadastro').innerText = "Salvar Registro";
             document.getElementById('input-nome').value = ""; document.getElementById('input-telefone').value = "";
             document.getElementById('input-ultima-ida').value = ""; document.getElementById('input-igreja').checked = true;
             document.getElementById('avatar-img').classList.add('hidden'); document.getElementById('avatar-icon').classList.remove('hidden');
-            document.getElementById('status-localizacao').innerText = "A AGUARDAR LOCALIZAÇÃO...";
+            document.getElementById('status-localizacao').innerText = "AGUARDANDO LOCALIZAÇÃO...";
             document.getElementById('status-localizacao').className = 'text-[10px] font-bold text-gray-400 mt-2 text-center uppercase';
             base64TempAvatar = null; latAtual = null; lngAtual = null;
             window.abrirModal('modal-cadastro');
@@ -448,7 +447,7 @@
             if(!latAtual) return alert("É obrigatório definir o local no mapa ou via GPS.");
             
             const btn = document.getElementById('btn-salvar-cadastro');
-            btn.disabled = true; btn.innerText = "A PROCESSAR...";
+            btn.disabled = true; btn.innerText = "PROCESSANDO...";
 
             const id = idEdicaoAtivo || Date.now().toString();
             const docRef = doc(db, 'familias', id);
@@ -474,8 +473,8 @@
             try {
                 await setDoc(docRef, dados);
                 fecharModal('modal-cadastro');
-            } catch (e) { alert("Erro ao sincronizar com a base de dados."); }
-            finally { btn.disabled = false; btn.innerText = "Guardar Registo"; }
+            } catch (e) { alert("Erro ao sincronizar com o banco de dados."); }
+            finally { btn.disabled = false; btn.innerText = "Salvar Registro"; }
         }
 
         window.prepararEdicao = (id) => {
@@ -483,8 +482,8 @@
             const f = baseDeDadosLocal.find(x => x.id === id);
             if (!f) return;
 
-            document.getElementById('titulo-modal-cadastro').innerText = "Editar Registo";
-            document.getElementById('btn-salvar-cadastro').innerText = "Atualizar Registo";
+            document.getElementById('titulo-modal-cadastro').innerText = "Editar Registro";
+            document.getElementById('btn-salvar-cadastro').innerText = "Atualizar Registro";
             document.getElementById('input-nome').value = f.nome;
             document.getElementById('input-telefone').value = f.tel;
             document.getElementById('input-igreja').checked = f.igreja === 'sim';
@@ -577,7 +576,7 @@
                         <p class="text-[10px] font-black text-gray-800 uppercase tracking-widest">${v.data}</p>
                         <button onclick="excluirVisita(${v.id_visita})" class="text-gray-300 hover:text-red-500 transition-colors"><i class="fas fa-trash"></i></button>
                     </div>
-                    <p class="text-xs text-gray-600 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">"${v.obs || 'Nenhuma observação registada.'}"</p>
+                    <p class="text-xs text-gray-600 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">"${v.obs || 'Nenhuma observação registrada.'}"</p>
                     ${v.foto ? `<img src="${v.foto}" class="w-full h-40 object-cover rounded-xl mt-3 border shadow-sm">` : ''}
                 </div>`;
             });
@@ -586,7 +585,7 @@
                 <div class="text-center mb-6">
                     ${img}
                     <h3 class="font-black text-2xl mt-3 text-gray-800 uppercase tracking-tighter">${f.nome}</h3>
-                    <p class="text-xs font-black text-blue-600 bg-blue-50 inline-block px-4 py-1.5 rounded-full mt-2 border border-blue-100">${f.tel || 'CONTACTO INDISPONÍVEL'}</p>
+                    <p class="text-xs font-black text-blue-600 bg-blue-50 inline-block px-4 py-1.5 rounded-full mt-2 border border-blue-100">${f.tel || 'TELEFONE NÃO CADASTRADO'}</p>
                     <div class="flex gap-2 mt-5">
                          <button onclick="window.abrirRota('waze', ${f.lat}, ${f.lng})" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-black shadow uppercase tracking-[0.2em]">Waze</button>
                          <button onclick="window.abrirRota('tel', '${f.tel}')" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-[10px] font-black shadow uppercase tracking-[0.2em]">Ligar</button>
@@ -594,23 +593,23 @@
                 </div>
                 <div class="bg-gray-50 p-4 rounded-xl mb-4 text-[10px] uppercase font-black text-gray-400 border">
                     <div class="flex justify-between border-b pb-2 mb-2 border-gray-200"><span>Frequenta a IURD:</span> <span class="text-gray-800">${f.igreja === 'sim' ? 'SIM' : 'NÃO'}</span></div>
-                    <div class="flex justify-between"><span>Última vez na Igreja:</span> <span class="text-gray-800">${f.ultimaIda || 'REGISTO AUSENTE'}</span></div>
+                    <div class="flex justify-between"><span>Última vez na Igreja:</span> <span class="text-gray-800">${f.ultimaIda || 'REGISTRO AUSENTE'}</span></div>
                 </div>
                 <h4 class="font-black border-b pb-2 mb-5 text-[10px] text-gray-400 uppercase tracking-widest flex items-center gap-2"><i class="fas fa-history text-gray-300"></i> Timeline de Apoio</h4>
-                ${vHTML || '<div class="text-center py-10 text-gray-400 text-[10px] font-black uppercase tracking-widest italic opacity-50">Sem registos de visita.</div>'}
+                ${vHTML || '<div class="text-center py-10 text-gray-400 text-[10px] font-black uppercase tracking-widest italic opacity-50">Sem registros de visita.</div>'}
             `;
             window.abrirModal('modal-detalhes');
         }
 
         window.abrirLista = () => {
             const c = document.getElementById('lista-conteudo'); c.innerHTML = "";
-            if(baseDeDadosLocal.length === 0) c.innerHTML = "<p class='text-center text-gray-400 py-10 uppercase text-[10px] font-black tracking-widest'>Nenhum registo na base de dados.</p>";
+            if(baseDeDadosLocal.length === 0) c.innerHTML = "<p class='text-center text-gray-400 py-10 uppercase text-[10px] font-black tracking-widest'>Nenhum registro no banco de dados.</p>";
             [...baseDeDadosLocal].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(f => {
                 c.innerHTML += `<div onclick="window.abrirDetalhes('${f.id}')" class="bg-white p-3 rounded-xl border flex items-center gap-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                     <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-inner">
                         ${f.fotoPerfil ? `<img src="${f.fotoPerfil}" class="w-full h-full object-cover">` : '<i class="fas fa-user text-gray-300"></i>'}
                     </div>
-                    <div class="flex-1 overflow-hidden"><p class="font-black text-sm text-gray-800 uppercase tracking-tighter truncate">${f.nome}</p><p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${f.tel || 'SEM CONTACTO'}</p></div>
+                    <div class="flex-1 overflow-hidden"><p class="font-black text-sm text-gray-800 uppercase tracking-tighter truncate">${f.nome}</p><p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${f.tel || 'SEM TELEFONE'}</p></div>
                     <i class="fas fa-chevron-right text-gray-200 text-xs"></i>
                 </div>`;
             });
@@ -628,7 +627,7 @@
         document.getElementById('btn-salvar-visita').onclick = async () => {
             const f = baseDeDadosLocal.find(x => x.id === familiaFocoId);
             const btn = document.getElementById('btn-salvar-visita');
-            btn.disabled = true; btn.innerText = "A ENVIAR...";
+            btn.disabled = true; btn.innerText = "ENVIANDO...";
             const nova = {
                 id_visita: Date.now(),
                 data: document.getElementById('visita-data').value.split('-').reverse().join('/'),
@@ -639,7 +638,7 @@
             await setDoc(doc(db, 'familias', f.id), f);
             fecharModal('modal-nova-visita');
             window.abrirDetalhes(f.id);
-            btn.disabled = false; btn.innerText = "GUARDAR";
+            btn.disabled = false; btn.innerText = "SALVAR";
         }
 
         window.excluirCadastroCompleto = () => {
@@ -652,7 +651,7 @@
         }
 
         window.excluirVisita = async (idVis) => {
-            if(confirm("Deseja remover este registo de visita permanentemente?")) {
+            if(confirm("Deseja remover este registro de visita permanentemente?")) {
                 const f = baseDeDadosLocal.find(x => x.id === familiaFocoId);
                 f.visitas = f.visitas.filter(v => v.id_visita !== idVis);
                 await setDoc(doc(db, 'familias', f.id), f);
@@ -669,7 +668,7 @@
                 map.setView([latAtual, lngAtual], 18);
                 document.getElementById('status-localizacao').innerText = "COORDENADA CAPTURADA VIA GPS";
                 document.getElementById('status-localizacao').className = 'text-[10px] font-black text-green-600 mt-2 text-center';
-            }, () => alert("Ative o GPS nas configurações do telemóvel."));
+            }, () => alert("Ative o GPS nas configurações do celular."));
         }
 
         window.ativarModoPin = () => {
