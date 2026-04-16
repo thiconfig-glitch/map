@@ -71,7 +71,7 @@
 
     <!-- MODAIS -->
     <div id="modais-app">
-        <!-- LEGENDA -->
+        <!-- LEGENDA AMPLIADA -->
         <div id="modal-legenda" class="hidden modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1020]">
              <div class="bg-white w-[90%] max-w-md rounded-xl p-5 shadow-2xl overflow-y-auto max-h-[85vh]">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -87,9 +87,9 @@
                     <div class="flex items-center gap-2 text-xs bg-red-50 p-2 rounded border border-red-200"><i class="fas fa-heart text-red-600"></i> <span class="font-bold">Base Igreja</span></div>
                 </div>
 
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Lista de Setores</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Micro-Regiões (Grande Maracanã)</p>
                 <div id="legenda-bairros" class="grid grid-cols-1 gap-2">
-                    <!-- Injetado via JS -->
+                    <!-- Injetado dinamicamente via JS baseada na matemática invisível -->
                 </div>
                 
                 <button onclick="fecharModal('modal-legenda')" class="w-full mt-6 bg-gray-800 text-white py-3 rounded-lg font-bold shadow uppercase tracking-widest text-xs">Fechar</button>
@@ -168,7 +168,6 @@
                         <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter">Cadastrados</h2>
                         <button onclick="fecharModal('modal-lista')" class="text-gray-400 p-2"><i class="fas fa-times"></i></button>
                     </div>
-                    <!-- Nova Barra de Busca -->
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         <input type="text" id="input-filtro-lista" onkeyup="filtrarListaAoVivo()" placeholder="Buscar família por nome..." class="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 outline-none focus:border-blue-500 text-sm font-bold text-gray-700 bg-gray-50">
@@ -239,7 +238,7 @@
         </div>
     </div>
 
-    <!-- O ponto azul do radar será gerado nativamente pelo Leaflet quando acionado -->
+    <!-- Ponto azul do radar -->
     <style>
         .gps-pulse {
             background: #2563eb; border-radius: 50%; height: 16px; width: 16px;
@@ -282,21 +281,22 @@
         let gpsTrackerId = null;
         let marcadorRadar = null;
 
-        // Apenas lista estática para a legenda, sem coordenadas
+        // VETOR DE MICRO-REGIÕES (Focado no Grande Maracanã). 
+        // Coordenadas aproximadas para formar caixas lógicas invisíveis para contagem regional.
         const setoresOperacionais = [
-            { nome: "Maracanã", cor: "#3b82f6" },
-            { nome: "Alterosa", cor: "#f97316" },
-            { nome: "José Corrêa Machado", cor: "#a855f7" },
-            { nome: "Itatiaia", cor: "#22c55e" },
-            { nome: "N. Sra. das Graças", cor: "#eab308" },
-            { nome: "Dona Gregória", cor: "#06b6d4" },
-            { nome: "Ciro dos Anjos", cor: "#ec4899" },
-            { nome: "Jardim São Geraldo", cor: "#78350f" },
-            { nome: "Joaquim Costa", cor: "#6366f1" },
-            { nome: "Chiquinho Guimarães", cor: "#84cc16" },
-            { nome: "Conjunto Olga Benário", cor: "#f43f5e" },
-            { nome: "Vila Campos", cor: "#14b8a6" },
-            { nome: "Vila Greice", cor: "#64748b" }
+            { nome: "Maracanã", cor: "#3b82f6", coords: [[-16.753, -43.872], [-16.753, -43.864], [-16.760, -43.864], [-16.760, -43.872]] },
+            { nome: "Alterosa", cor: "#f97316", coords: [[-16.760, -43.872], [-16.760, -43.864], [-16.768, -43.864], [-16.768, -43.872]] },
+            { nome: "José Corrêa Machado", cor: "#a855f7", coords: [[-16.753, -43.864], [-16.753, -43.856], [-16.760, -43.856], [-16.760, -43.864]] },
+            { nome: "Itatiaia", cor: "#22c55e", coords: [[-16.760, -43.864], [-16.760, -43.856], [-16.768, -43.856], [-16.768, -43.864]] },
+            { nome: "N. Sra. das Graças", cor: "#eab308", coords: [[-16.746, -43.864], [-16.746, -43.856], [-16.753, -43.856], [-16.753, -43.864]] },
+            { nome: "Dona Gregória", cor: "#06b6d4", coords: [[-16.768, -43.864], [-16.768, -43.856], [-16.776, -43.856], [-16.776, -43.864]] },
+            { nome: "Ciro dos Anjos", cor: "#ec4899", coords: [[-16.746, -43.872], [-16.746, -43.864], [-16.753, -43.864], [-16.753, -43.872]] },
+            { nome: "Jardim São Geraldo", cor: "#78350f", coords: [[-16.753, -43.880], [-16.753, -43.872], [-16.760, -43.872], [-16.760, -43.880]] },
+            { nome: "Joaquim Costa", cor: "#6366f1", coords: [[-16.760, -43.880], [-16.760, -43.872], [-16.768, -43.872], [-16.768, -43.880]] },
+            { nome: "Chiquinho Guimarães", cor: "#84cc16", coords: [[-16.768, -43.880], [-16.768, -43.872], [-16.776, -43.872], [-16.776, -43.880]] },
+            { nome: "Conj. Olga Benário", cor: "#f43f5e", coords: [[-16.776, -43.880], [-16.776, -43.872], [-16.784, -43.872], [-16.784, -43.880]] },
+            { nome: "Vila Campos", cor: "#14b8a6", coords: [[-16.740, -43.872], [-16.740, -43.864], [-16.746, -43.864], [-16.746, -43.872]] },
+            { nome: "Vila Greice", cor: "#64748b", coords: [[-16.740, -43.864], [-16.740, -43.856], [-16.746, -43.856], [-16.746, -43.864]] }
         ];
 
         // --- SISTEMA CORE ---
@@ -317,8 +317,6 @@
                     });
                     L.marker([-16.7588417, -43.8673387], { icon: heartIcon, zIndexOffset: 2000 }).addTo(map).bindPopup("<div class='text-center'><b>Base Igreja Universal</b><br><span class='text-[10px] text-gray-500 font-bold'>Maracanã</span></div>");
                     
-                    gerarLegendaBairros();
-                    
                     map.on('click', (e) => {
                         if (!modoPinAtivo) return;
                         latAtual = e.latlng.lat; lngAtual = e.latlng.lng; modoPinAtivo = false;
@@ -337,7 +335,7 @@
             }
         });
 
-        // --- SISTEMA DE TELEMETRIA ---
+        // --- SISTEMA DE TELEMETRIA (RADAR SEGUIDOR) ---
         window.toggleTracker = () => {
             const btn = document.getElementById('btn-tracker');
             
@@ -378,15 +376,40 @@
             }
         }
 
-        // --- LEGENDA E BASE ---
-        function gerarLegendaBairros() {
+        // --- MATEMÁTICA DE CONTAGEM REGIONAL (Ray-Casting invisível) ---
+        function isMarkerInsidePolygon(point, vs) {
+            var x = point[0], y = point[1];
+            var inside = false;
+            for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+                var xi = vs[i][0], yi = vs[i][1];
+                var xj = vs[j][0], yj = vs[j][1];
+                var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function atualizarLegendaDinamicamente() {
             const container = document.getElementById('legenda-bairros');
             container.innerHTML = '';
+            
             setoresOperacionais.forEach(s => {
+                let contagem = 0;
+                baseDeDadosLocal.forEach(f => {
+                    if (isMarkerInsidePolygon([f.lat, f.lng], s.coords)) {
+                        contagem++;
+                    }
+                });
+
                 container.innerHTML += `
-                    <div class="flex items-center gap-3 bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="w-4 h-4 rounded" style="background: ${s.cor};"></div>
-                        <span class="text-[11px] font-black text-gray-700 uppercase tracking-tighter">${s.nome}</span>
+                    <div class="flex justify-between items-center bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded" style="background: ${s.cor};"></div>
+                            <span class="text-[11px] font-black text-gray-700 uppercase tracking-tighter truncate w-[130px]">${s.nome}</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-gray-600 bg-white px-2 py-0.5 rounded border shadow-inner">
+                            <strong class="text-blue-600">${contagem}</strong> resistências
+                        </span>
                     </div>`;
             });
         }
@@ -402,7 +425,8 @@
                     renderizarPino(familia);
                 });
                 document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Conectado';
-                // Se a lista estiver aberta, atualiza ela ao vivo
+                atualizarLegendaDinamicamente();
+                
                 if(!document.getElementById('modal-lista').classList.contains('hidden')) {
                     window.filtrarListaAoVivo();
                 }
@@ -590,7 +614,6 @@
                 return;
             }
 
-            // Ordenação Alfabética Rigorosa PT-BR
             [...arrayFiltrado].sort((a,b) => (a.nome || "").localeCompare((b.nome || ""), 'pt-BR', { sensitivity: 'base' })).forEach(f => {
                 c.innerHTML += `<div onclick="window.abrirDetalhes('${f.id}')" class="bg-white p-3 rounded-xl border flex items-center gap-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer">
                     <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-inner flex-shrink-0">
